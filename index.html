@@ -1,1 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>노동법 레터</title>
 
+<style>
+body {
+  margin: 0;
+  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  background: #f7f7fb;
+  color: #222;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.header {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 24px;
+  border: 1px solid #eee;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 26px;
+  color: #5b3cc4;
+}
+
+.card-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.card {
+  flex: 1;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  text-align: center;
+  transition: 0.2s;
+}
+
+.card:hover {
+  border-color: #7c5cff;
+}
+
+.card.active {
+  background: #ede9ff;
+  border-color: #7c5cff;
+  color: #5b3cc4;
+  font-weight: bold;
+}
+
+.content-box {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #ddd;
+  margin-bottom: 30px;
+}
+
+.accordion {
+  margin-top: 20px;
+}
+
+.accordion-item {
+  margin-bottom: 10px;
+}
+
+.accordion-header {
+  background: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.accordion-content {
+  display: none;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1 id="todayTitle">로딩중...</h1>
+  </div>
+
+  <div class="card-buttons">
+    <div class="card active" onclick="selectTab('issue')">이슈 공부하기</div>
+    <div class="card" onclick="selectTab('case')">판례 공부하기</div>
+    <div class="card" onclick="selectTab('study')">노동법 공부하기</div>
+  </div>
+
+  <div class="content-box" id="contentBox"></div>
+
+  <div class="accordion" id="archive"></div>
+
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec?mode=json";
+
+let data = [];
+let currentTab = 'issue';
+
+async function loadData() {
+  const res = await fetch(API_URL);
+  const json = await res.json();
+  data = json.letters;
+
+  render();
+}
+
+function render() {
+  if (data.length === 0) return;
+
+  const today = data[0];
+  document.getElementById("todayTitle").innerText =
+    today.publish_date + " 오늘의 노동법 레터입니다.";
+
+  renderContent(today);
+  renderArchive();
+}
+
+function renderContent(dayData) {
+  const content = dayData[currentTab];
+  document.getElementById("contentBox").innerHTML =
+    content ? content.body_html : "내용 없음";
+}
+
+function selectTab(tab) {
+  currentTab = tab;
+
+  document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
+  event.target.classList.add("active");
+
+  renderContent(data[0]);
+}
+
+function renderArchive() {
+  const container = document.getElementById("archive");
+  container.innerHTML = "";
+
+  data.slice(1).forEach((day, index) => {
+    const item = document.createElement("div");
+    item.className = "accordion-item";
+
+    item.innerHTML = `
+      <div class="accordion-header" onclick="toggle(${index})">
+        ${day.publish_date}
+      </div>
+      <div class="accordion-content" id="acc-${index}">
+        <div class="card-buttons">
+          <div class="card" onclick="showArchive(${index}, 'issue')">이슈</div>
+          <div class="card" onclick="showArchive(${index}, 'case')">판례</div>
+          <div class="card" onclick="showArchive(${index}, 'study')">노동법</div>
+        </div>
+        <div class="content-box" id="archive-content-${index}"></div>
+      </div>
+    `;
+
+    container.appendChild(item);
+  });
+}
+
+function toggle(index) {
+  const el = document.getElementById("acc-" + index);
+  el.style.display = el.style.display === "block" ? "none" : "block";
+}
+
+function showArchive(index, tab) {
+  const day = data[index + 1];
+  const content = day[tab];
+
+  document.getElementById("archive-content-" + index).innerHTML =
+    content ? content.body_html : "내용 없음";
+}
+
+loadData();
+</script>
+
+</body>
+</html>
