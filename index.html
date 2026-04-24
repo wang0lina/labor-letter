@@ -28,8 +28,9 @@ body {
 
 .header h1 {
   margin: 0;
-  font-size: 26px;
+  font-size: 28px;
   color: #5b3cc4;
+  line-height: 1.4;
 }
 
 .card-buttons {
@@ -47,6 +48,7 @@ body {
   cursor: pointer;
   text-align: center;
   transition: 0.2s;
+  font-size: 17px;
 }
 
 .card:hover {
@@ -62,10 +64,23 @@ body {
 
 .content-box {
   background: white;
-  padding: 24px;
+  padding: 28px;
   border-radius: 16px;
   border: 1px solid #ddd;
   margin-bottom: 30px;
+}
+
+.content-box h2 {
+  color: #5b3cc4;
+  font-size: 26px;
+  margin-top: 0;
+  margin-bottom: 22px;
+}
+
+.content-box article {
+  border: 1px solid #ddd !important;
+  border-radius: 14px !important;
+  padding: 24px !important;
 }
 
 .accordion {
@@ -78,7 +93,7 @@ body {
 
 .accordion-header {
   background: #fff;
-  padding: 14px;
+  padding: 16px;
   border-radius: 10px;
   border: 1px solid #ddd;
   cursor: pointer;
@@ -101,9 +116,9 @@ body {
   </div>
 
   <div class="card-buttons">
-    <div class="card active" onclick="selectTab('issue')">이슈 공부하기</div>
-    <div class="card" onclick="selectTab('case')">판례 공부하기</div>
-    <div class="card" onclick="selectTab('study')">노동법 공부하기</div>
+    <div class="card active" onclick="selectTab(event, 'issue')">이슈 공부하기</div>
+    <div class="card" onclick="selectTab(event, 'case')">판례 공부하기</div>
+    <div class="card" onclick="selectTab(event, 'study')">노동법 공부하기</div>
   </div>
 
   <div class="content-box" id="contentBox"></div>
@@ -118,11 +133,33 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ56
 let data = [];
 let currentTab = 'issue';
 
+function formatKoreanDate(dateValue) {
+  const d = new Date(dateValue);
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+}
+
+function tabTitle(tab) {
+  if (tab === 'issue') return '오늘의 노무 이슈';
+  if (tab === 'case') return '오늘의 판례';
+  if (tab === 'study') return '오늘의 노동법 공부';
+  return '';
+}
+
+function cleanBodyHtml(html) {
+  const temp = document.createElement("div");
+  temp.innerHTML = html;
+
+  const firstSection = temp.querySelector("section");
+  if (firstSection) firstSection.remove();
+
+  const inner = temp.querySelector("div");
+  return inner ? inner.innerHTML : temp.innerHTML;
+}
+
 async function loadData() {
   const res = await fetch(API_URL);
   const json = await res.json();
   data = json.letters;
-
   render();
 }
 
@@ -131,7 +168,7 @@ function render() {
 
   const today = data[0];
   document.getElementById("todayTitle").innerText =
-    today.publish_date + " 오늘의 노동법 레터입니다.";
+    formatKoreanDate(today.publish_date) + " 오늘의 레터입니다.";
 
   renderContent(today);
   renderArchive();
@@ -139,16 +176,17 @@ function render() {
 
 function renderContent(dayData) {
   const content = dayData[currentTab];
+
   document.getElementById("contentBox").innerHTML =
-    content ? content.body_html : "내용 없음";
+    content
+      ? `<h2>${tabTitle(currentTab)}</h2>${cleanBodyHtml(content.body_html)}`
+      : `<h2>${tabTitle(currentTab)}</h2><p>아직 발행된 내용이 없습니다.</p>`;
 }
 
-function selectTab(tab) {
+function selectTab(e, tab) {
   currentTab = tab;
-
   document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
-  event.target.classList.add("active");
-
+  e.target.classList.add("active");
   renderContent(data[0]);
 }
 
@@ -162,13 +200,13 @@ function renderArchive() {
 
     item.innerHTML = `
       <div class="accordion-header" onclick="toggle(${index})">
-        ${day.publish_date}
+        ${formatKoreanDate(day.publish_date)}
       </div>
       <div class="accordion-content" id="acc-${index}">
         <div class="card-buttons">
-          <div class="card" onclick="showArchive(${index}, 'issue')">이슈</div>
-          <div class="card" onclick="showArchive(${index}, 'case')">판례</div>
-          <div class="card" onclick="showArchive(${index}, 'study')">노동법</div>
+          <div class="card" onclick="showArchive(${index}, 'issue')">이슈 공부하기</div>
+          <div class="card" onclick="showArchive(${index}, 'case')">판례 공부하기</div>
+          <div class="card" onclick="showArchive(${index}, 'study')">노동법 공부하기</div>
         </div>
         <div class="content-box" id="archive-content-${index}"></div>
       </div>
@@ -188,7 +226,9 @@ function showArchive(index, tab) {
   const content = day[tab];
 
   document.getElementById("archive-content-" + index).innerHTML =
-    content ? content.body_html : "내용 없음";
+    content
+      ? `<h2>${tabTitle(tab)}</h2>${cleanBodyHtml(content.body_html)}`
+      : `<h2>${tabTitle(tab)}</h2><p>내용 없음</p>`;
 }
 
 loadData();
