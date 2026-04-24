@@ -20,23 +20,23 @@
             <div class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-3">
                 Daily Labor Law Learning
             </div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900 mb-2">오늘의 노무 학습</h1>
-            <p id="today-date-display" class="text-slate-500 font-medium"></p>
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900 mb-2 text-center">오늘의 노무 학습</h1>
+            <p id="today-date-display" class="text-slate-500 font-medium text-center"></p>
         </header>
 
-        <!-- 메인 콘텐츠 영역 -->
+        <!-- 메인 콘텐츠 영역 (오늘의 학습) -->
         <main id="content-area">
             <div id="loading" class="flex flex-col items-center justify-center py-20">
                 <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-200 h-12 w-12 mb-4"></div>
-                <p class="text-slate-500">AI가 오늘 공부할 내용을 준비하고 있습니다...</p>
+                <p class="text-slate-500 text-center">AI가 오늘 공부할 내용을 준비하고 있습니다...</p>
             </div>
 
             <div id="article-card" class="hidden">
                 <!-- 아티클 카드 -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
                     <div class="p-6 md:p-8">
                         <div class="flex items-center justify-between mb-4">
-                            <span id="category-tag" class="px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600 uppercase tracking-wider">CATEGORY</span>
+                            <span id="category-tag" class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider">CATEGORY</span>
                             <span id="date-info" class="text-xs text-slate-400">ARTICLE DATE</span>
                         </div>
                         
@@ -53,14 +53,16 @@
                     </div>
                 </div>
 
-                <!-- 컨트롤 버튼 -->
-                <div class="flex flex-col gap-3">
-                    <p class="text-center text-xs text-slate-400 italic mb-1">오늘의 학습은 매일 오전 0시에 자동으로 갱신됩니다.</p>
-                    <button onclick="fetchNewRandom()" class="w-full py-4 bg-white border border-slate-200 text-slate-600 rounded-xl font-semibold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-                        다른 이슈 더 공부하기 (랜덤)
-                    </button>
-                </div>
+                <!-- 아카이브 섹션 (지난 학습 목록) -->
+                <section class="mt-12">
+                    <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
+                        지난 학습 목록
+                    </h3>
+                    <div id="archive-list" class="space-y-3">
+                        <!-- 목록이 여기에 생성됨 -->
+                    </div>
+                </section>
             </div>
         </main>
 
@@ -70,59 +72,78 @@
     </div>
 
     <script>
-        // 중요: 본인의 Google Apps Script 웹 앱 URL로 교체하세요
         const BASE_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
 
         const loadingEl = document.getElementById('loading');
         const articleCard = document.getElementById('article-card');
         const todayDateDisplay = document.getElementById('today-date-display');
+        const archiveList = document.getElementById('archive-list');
+
+        let allArticles = [];
 
         // 오늘 날짜 표시
         const today = new Date();
         todayDateDisplay.textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일 오늘의 추천 학습`;
 
-        // 1. 페이지 로드 시: 오늘 날짜를 기준으로 고정된 기사 가져오기
-        async function loadDailyArticle() {
+        // 1. 페이지 로드 시 전체 데이터 가져오기
+        async function init() {
             showLoading(true);
             try {
-                // 앱스 스크립트에 mode=count를 추가하여 전체 개수 확인 (GAS 코드에 구현되어 있음)
-                const countRes = await fetch(`${BASE_URL}?mode=count`);
-                const countData = await countRes.json();
-                
-                if (countData.success && countData.count > 0) {
-                    // 날짜 기반 시드 생성 (YYYYMMDD)
-                    const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-                    // 시드를 사용하여 인덱스 결정 (데이터 개수 안에서 결정됨)
-                    const dailyIndex = dateSeed % countData.count;
-                    
-                    // 특정 인덱스를 가져오는 기능이 없으므로, GAS를 수정하기보다
-                    // 여기서는 단순히 mode=random으로 가져오되, 사용자가 버튼을 누르기 전까진 고정된 데이터처럼 보이게 함
-                    // (진정한 고정 기능을 위해서는 GAS 쪽에서 index 파라미터를 처리해야 하지만, 
-                    // 현재 구조에서는 처음 로드된 것을 유지하는 방향으로 구현)
-                    
-                    await fetchNewRandom(false);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('데이터 연결에 실패했습니다.');
-            }
-        }
-
-        // 2. 버튼 클릭 시: 새로운 랜덤 데이터 가져오기
-        async function fetchNewRandom(isManual = true) {
-            showLoading(true);
-            try {
-                const response = await fetch(`${BASE_URL}?mode=random`);
+                // 전체 목록을 가져오기 위해 mode=all 호출 (GAS에 해당 모드가 있어야 함)
+                // 만약 mode=all이 없다면 기본 random 호출 후 목록을 구성하도록 설계
+                const response = await fetch(`${BASE_URL}?mode=all`);
                 const result = await response.json();
 
-                if (result.success && result.data) {
-                    displayArticle(result.data);
+                if (result.success && result.data && result.data.length > 0) {
+                    allArticles = result.data;
+                    
+                    // 1. 오늘의 학습 결정 (날짜 시드 기반)
+                    const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+                    const dailyIndex = dateSeed % allArticles.length;
+                    
+                    displayArticle(allArticles[dailyIndex]);
+                    
+                    // 2. 전체 목록 렌더링
+                    renderArchive(allArticles);
+                } else {
+                    // 데이터가 없을 경우 random이라도 시도
+                    const fallback = await fetch(`${BASE_URL}?mode=random`);
+                    const fallRes = await fallback.json();
+                    if(fallRes.success) displayArticle(fallRes.data);
                 }
             } catch (error) {
                 console.error('Error:', error);
+                todayDateDisplay.textContent = "데이터를 불러올 수 없습니다.";
             } finally {
                 showLoading(false);
             }
+        }
+
+        function renderArchive(articles) {
+            archiveList.innerHTML = '';
+            // 최신순 정렬 (ID나 Timestamp 기준)
+            const sorted = [...articles].reverse();
+            
+            sorted.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-sm transition-all cursor-pointer flex justify-between items-center group";
+                itemDiv.onclick = () => {
+                    displayArticle(item);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                const dateStr = new Date(item.published_at).toLocaleDateString();
+                const typeLabel = item.type === 'case' ? '⚖️' : '📰';
+
+                itemDiv.innerHTML = `
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${dateStr}</span>
+                        <h4 class="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 line-clamp-1">${typeLabel} ${item.title}</h4>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-300 group-hover:text-indigo-400"><path d="m9 18 6-6-6-6"/></svg>
+                `;
+                archiveList.appendChild(itemDiv);
+            });
         }
 
         function showLoading(isLoading) {
@@ -151,32 +172,39 @@
             contentDiv.innerHTML = '';
 
             const c = data.content;
+            let parsedContent;
             
-            if (typeof c === 'object') {
+            try {
+                parsedContent = typeof c === 'string' ? JSON.parse(c) : c;
+            } catch(e) {
+                parsedContent = c;
+            }
+            
+            if (typeof parsedContent === 'object' && parsedContent !== null) {
                 contentDiv.innerHTML = `
-                    <div class="bg-indigo-50 p-4 rounded-xl border-l-4 border-indigo-500">
-                        <h4 class="text-xs font-bold text-indigo-600 mb-1">한줄요약</h4>
-                        <p class="text-slate-700 leading-relaxed text-sm font-medium">${c.summary || '내용 없음'}</p>
+                    <div class="bg-indigo-50 p-4 rounded-xl border-l-4 border-indigo-500 text-left">
+                        <h4 class="text-xs font-bold text-indigo-600 mb-1 text-left">한줄요약</h4>
+                        <p class="text-slate-700 leading-relaxed text-sm font-medium text-left">${parsedContent.summary || '내용 없음'}</p>
                     </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">🔍 사건 배경</h4>
-                        <p class="text-slate-600 text-sm leading-relaxed">${c.background || '내용 없음'}</p>
+                    <div class="text-left">
+                        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2 text-left">🔍 사건 배경</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed text-left">${parsedContent.background || '내용 없음'}</p>
                     </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">💡 핵심 포인트</h4>
-                        <p class="text-slate-600 text-sm leading-relaxed">${c.points || '내용 없음'}</p>
+                    <div class="text-left">
+                        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2 text-left">💡 핵심 포인트</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed text-left">${parsedContent.points || '내용 없음'}</p>
                     </div>
-                    <div class="bg-slate-900 p-5 rounded-xl">
-                        <h4 class="text-sm font-bold text-indigo-300 mb-2 flex items-center gap-2">🚀 HR 시사점</h4>
-                        <p class="text-slate-200 text-sm leading-relaxed font-normal">${c.implications || '내용 없음'}</p>
+                    <div class="bg-slate-900 p-5 rounded-xl text-left">
+                        <h4 class="text-sm font-bold text-indigo-300 mb-2 flex items-center gap-2 text-left">🚀 HR 시사점</h4>
+                        <p class="text-slate-200 text-sm leading-relaxed font-normal text-left">${parsedContent.implications || '내용 없음'}</p>
                     </div>
                 `;
             } else {
-                contentDiv.innerHTML = `<p class="text-slate-600 leading-relaxed text-sm">${c}</p>`;
+                contentDiv.innerHTML = `<p class="text-slate-600 leading-relaxed text-sm text-left">${c}</p>`;
             }
         }
 
-        window.onload = loadDailyArticle;
+        window.onload = init;
     </script>
 </body>
 </html>
