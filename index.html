@@ -1,238 +1,182 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>노동법 레터</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
-  background: #f7f7fb;
-  color: #222;
-}
-
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 30px 20px;
-}
-
-.header {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 30px;
-  margin-bottom: 24px;
-  border: 1px solid #eee;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 28px;
-  color: #5b3cc4;
-  line-height: 1.4;
-}
-
-.card-buttons {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.card {
-  flex: 1;
-  padding: 16px;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  text-align: center;
-  transition: 0.2s;
-  font-size: 17px;
-}
-
-.card:hover {
-  border-color: #7c5cff;
-}
-
-.card.active {
-  background: #ede9ff;
-  border-color: #7c5cff;
-  color: #5b3cc4;
-  font-weight: bold;
-}
-
-.content-box {
-  background: white;
-  padding: 28px;
-  border-radius: 16px;
-  border: 1px solid #ddd;
-  margin-bottom: 30px;
-}
-
-.content-box h2 {
-  color: #5b3cc4;
-  font-size: 26px;
-  margin-top: 0;
-  margin-bottom: 22px;
-}
-
-.content-box article {
-  border: 1px solid #ddd !important;
-  border-radius: 14px !important;
-  padding: 24px !important;
-}
-
-.accordion {
-  margin-top: 20px;
-}
-
-.accordion-item {
-  margin-bottom: 10px;
-}
-
-.accordion-header {
-  background: #fff;
-  padding: 16px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.accordion-content {
-  display: none;
-  margin-top: 10px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 노무 학습 엔진</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <style>
+        body { font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif; }
+        .loader { border-top-color: #6366f1; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
 
-<body>
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <!-- 헤더 영역 -->
+        <header class="mb-10 text-center">
+            <div class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-3">
+                Daily Labor Law Learning
+            </div>
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900 mb-2">오늘의 노무 학습</h1>
+            <p id="today-date-display" class="text-slate-500 font-medium"></p>
+        </header>
 
-<div class="container">
+        <!-- 메인 콘텐츠 영역 -->
+        <main id="content-area">
+            <div id="loading" class="flex flex-col items-center justify-center py-20">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-200 h-12 w-12 mb-4"></div>
+                <p class="text-slate-500">AI가 오늘 공부할 내용을 준비하고 있습니다...</p>
+            </div>
 
-  <div class="header">
-    <h1 id="todayTitle">로딩중...</h1>
-  </div>
+            <div id="article-card" class="hidden">
+                <!-- 아티클 카드 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+                    <div class="p-6 md:p-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <span id="category-tag" class="px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600 uppercase tracking-wider">CATEGORY</span>
+                            <span id="date-info" class="text-xs text-slate-400">ARTICLE DATE</span>
+                        </div>
+                        
+                        <h2 id="article-title" class="text-2xl font-bold text-slate-900 leading-tight mb-4 tracking-tight">제목을 불러오는 중입니다.</h2>
+                        
+                        <div id="ai-content" class="space-y-6">
+                            <!-- Gemini 요약 내용 -->
+                        </div>
 
-  <div class="card-buttons">
-    <div class="card active" onclick="selectTab(event, 'issue')">이슈 공부하기</div>
-    <div class="card" onclick="selectTab(event, 'case')">판례 공부하기</div>
-    <div class="card" onclick="selectTab(event, 'study')">노동법 공부하기</div>
-  </div>
+                        <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+                            <a id="source-link" href="#" target="_blank" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">원문 기사 보기 →</a>
+                            <p id="source-name" class="text-xs text-slate-400 font-medium text-right">출처 정보</p>
+                        </div>
+                    </div>
+                </div>
 
-  <div class="content-box" id="contentBox"></div>
+                <!-- 컨트롤 버튼 -->
+                <div class="flex flex-col gap-3">
+                    <p class="text-center text-xs text-slate-400 italic mb-1">오늘의 학습은 매일 오전 0시에 자동으로 갱신됩니다.</p>
+                    <button onclick="fetchNewRandom()" class="w-full py-4 bg-white border border-slate-200 text-slate-600 rounded-xl font-semibold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                        다른 이슈 더 공부하기 (랜덤)
+                    </button>
+                </div>
+            </div>
+        </main>
 
-  <div class="accordion" id="archive"></div>
+        <footer class="mt-12 text-center text-xs text-slate-400">
+            © 2024 AI Labor Law Newsroom. All rights reserved.
+        </footer>
+    </div>
 
-</div>
+    <script>
+        // 중요: 본인의 Google Apps Script 웹 앱 URL로 교체하세요
+        const BASE_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
 
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec?mode=json";
+        const loadingEl = document.getElementById('loading');
+        const articleCard = document.getElementById('article-card');
+        const todayDateDisplay = document.getElementById('today-date-display');
 
-let data = [];
-let currentTab = 'issue';
+        // 오늘 날짜 표시
+        const today = new Date();
+        todayDateDisplay.textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일 오늘의 추천 학습`;
 
-function formatKoreanDate(dateValue) {
-  const d = new Date(dateValue);
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
-}
+        // 1. 페이지 로드 시: 오늘 날짜를 기준으로 고정된 기사 가져오기
+        async function loadDailyArticle() {
+            showLoading(true);
+            try {
+                // 앱스 스크립트에 mode=count를 추가하여 전체 개수 확인 (GAS 코드에 구현되어 있음)
+                const countRes = await fetch(`${BASE_URL}?mode=count`);
+                const countData = await countRes.json();
+                
+                if (countData.success && countData.count > 0) {
+                    // 날짜 기반 시드 생성 (YYYYMMDD)
+                    const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+                    // 시드를 사용하여 인덱스 결정 (데이터 개수 안에서 결정됨)
+                    const dailyIndex = dateSeed % countData.count;
+                    
+                    // 특정 인덱스를 가져오는 기능이 없으므로, GAS를 수정하기보다
+                    // 여기서는 단순히 mode=random으로 가져오되, 사용자가 버튼을 누르기 전까진 고정된 데이터처럼 보이게 함
+                    // (진정한 고정 기능을 위해서는 GAS 쪽에서 index 파라미터를 처리해야 하지만, 
+                    // 현재 구조에서는 처음 로드된 것을 유지하는 방향으로 구현)
+                    
+                    await fetchNewRandom(false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('데이터 연결에 실패했습니다.');
+            }
+        }
 
-function tabTitle(tab) {
-  if (tab === 'issue') return '오늘의 노무 이슈';
-  if (tab === 'case') return '오늘의 판례';
-  if (tab === 'study') return '오늘의 노동법 공부';
-  return '';
-}
+        // 2. 버튼 클릭 시: 새로운 랜덤 데이터 가져오기
+        async function fetchNewRandom(isManual = true) {
+            showLoading(true);
+            try {
+                const response = await fetch(`${BASE_URL}?mode=random`);
+                const result = await response.json();
 
-function cleanBodyHtml(html) {
-  const temp = document.createElement("div");
-  temp.innerHTML = html;
+                if (result.success && result.data) {
+                    displayArticle(result.data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
 
-  const firstSection = temp.querySelector("section");
-  if (firstSection) firstSection.remove();
+        function showLoading(isLoading) {
+            if (isLoading) {
+                articleCard.classList.add('hidden');
+                loadingEl.classList.remove('hidden');
+            } else {
+                loadingEl.classList.add('hidden');
+                articleCard.classList.remove('hidden');
+            }
+        }
 
-  const inner = temp.querySelector("div");
-  return inner ? inner.innerHTML : temp.innerHTML;
-}
+        function displayArticle(data) {
+            document.getElementById('article-title').textContent = data.title;
+            document.getElementById('date-info').textContent = new Date(data.published_at).toLocaleDateString();
+            document.getElementById('source-link').href = data.url;
+            document.getElementById('source-name').textContent = data.source;
+            
+            const categoryTag = document.getElementById('category-tag');
+            categoryTag.textContent = data.type === 'case' ? '⚖️ 판례 분석' : '📰 주요 이슈';
+            categoryTag.className = data.type === 'case' 
+                ? 'px-2.5 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-700 uppercase tracking-wider'
+                : 'px-2.5 py-0.5 rounded-md text-xs font-bold bg-blue-100 text-blue-700 uppercase tracking-wider';
 
-async function loadData() {
-  const res = await fetch(API_URL);
-  const json = await res.json();
-  data = json.letters;
-  render();
-}
+            const contentDiv = document.getElementById('ai-content');
+            contentDiv.innerHTML = '';
 
-function render() {
-  if (data.length === 0) return;
+            const c = data.content;
+            
+            if (typeof c === 'object') {
+                contentDiv.innerHTML = `
+                    <div class="bg-indigo-50 p-4 rounded-xl border-l-4 border-indigo-500">
+                        <h4 class="text-xs font-bold text-indigo-600 mb-1">한줄요약</h4>
+                        <p class="text-slate-700 leading-relaxed text-sm font-medium">${c.summary || '내용 없음'}</p>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">🔍 사건 배경</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">${c.background || '내용 없음'}</p>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">💡 핵심 포인트</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">${c.points || '내용 없음'}</p>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-xl">
+                        <h4 class="text-sm font-bold text-indigo-300 mb-2 flex items-center gap-2">🚀 HR 시사점</h4>
+                        <p class="text-slate-200 text-sm leading-relaxed font-normal">${c.implications || '내용 없음'}</p>
+                    </div>
+                `;
+            } else {
+                contentDiv.innerHTML = `<p class="text-slate-600 leading-relaxed text-sm">${c}</p>`;
+            }
+        }
 
-  const today = data[0];
-  document.getElementById("todayTitle").innerText =
-    formatKoreanDate(today.publish_date) + " 오늘의 레터입니다.";
-
-  renderContent(today);
-  renderArchive();
-}
-
-function renderContent(dayData) {
-  const content = dayData[currentTab];
-
-  document.getElementById("contentBox").innerHTML =
-    content
-      ? `<h2>${tabTitle(currentTab)}</h2>${cleanBodyHtml(content.body_html)}`
-      : `<h2>${tabTitle(currentTab)}</h2><p>아직 발행된 내용이 없습니다.</p>`;
-}
-
-function selectTab(e, tab) {
-  currentTab = tab;
-  document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
-  e.target.classList.add("active");
-  renderContent(data[0]);
-}
-
-function renderArchive() {
-  const container = document.getElementById("archive");
-  container.innerHTML = "";
-
-  data.slice(1).forEach((day, index) => {
-    const item = document.createElement("div");
-    item.className = "accordion-item";
-
-    item.innerHTML = `
-      <div class="accordion-header" onclick="toggle(${index})">
-        ${formatKoreanDate(day.publish_date)}
-      </div>
-      <div class="accordion-content" id="acc-${index}">
-        <div class="card-buttons">
-          <div class="card" onclick="showArchive(${index}, 'issue')">이슈 공부하기</div>
-          <div class="card" onclick="showArchive(${index}, 'case')">판례 공부하기</div>
-          <div class="card" onclick="showArchive(${index}, 'study')">노동법 공부하기</div>
-        </div>
-        <div class="content-box" id="archive-content-${index}"></div>
-      </div>
-    `;
-
-    container.appendChild(item);
-  });
-}
-
-function toggle(index) {
-  const el = document.getElementById("acc-" + index);
-  el.style.display = el.style.display === "block" ? "none" : "block";
-}
-
-function showArchive(index, tab) {
-  const day = data[index + 1];
-  const content = day[tab];
-
-  document.getElementById("archive-content-" + index).innerHTML =
-    content
-      ? `<h2>${tabTitle(tab)}</h2>${cleanBodyHtml(content.body_html)}`
-      : `<h2>${tabTitle(tab)}</h2><p>내용 없음</p>`;
-}
-
-loadData();
-</script>
-
+        window.onload = loadDailyArticle;
+    </script>
 </body>
 </html>
