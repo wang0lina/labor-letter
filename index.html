@@ -1,210 +1,195 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 노무 학습 엔진</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-    <style>
-        body { font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif; }
-        .loader { border-top-color: #6366f1; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>오늘의 노무 학습</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <style>
+    body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
+    .loader { border-top-color: #7c3aed; animation: spinner 1.2s linear infinite; }
+    @keyframes spinner { to { transform: rotate(360deg); } }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen">
 
-    <div class="max-w-3xl mx-auto px-4 py-8">
-        <!-- 헤더 영역 -->
-        <header class="mb-10 text-center">
-            <div class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-3">
-                Daily Labor Law Learning
-            </div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900 mb-2 text-center">오늘의 노무 학습</h1>
-            <p id="today-date-display" class="text-slate-500 font-medium text-center"></p>
-        </header>
+<body class="bg-violet-50/40 text-slate-900 min-h-screen">
+  <div class="max-w-4xl mx-auto px-4 py-8">
 
-        <!-- 메인 콘텐츠 영역 (오늘의 학습) -->
-        <main id="content-area">
-            <div id="loading" class="flex flex-col items-center justify-center py-20">
-                <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-200 h-12 w-12 mb-4"></div>
-                <p class="text-slate-500 text-center">AI가 오늘 공부할 내용을 준비하고 있습니다...</p>
-            </div>
+    <header class="mb-8 text-center">
+      <div class="inline-block px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-4">
+        Daily Labor Law Learning
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-2">오늘의 노무 학습</h1>
+      <p id="today-date-display" class="text-slate-500 font-medium"></p>
+    </header>
 
-            <div id="article-card" class="hidden">
-                <!-- 아티클 카드 -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
-                    <div class="p-6 md:p-8">
-                        <div class="flex items-center justify-between mb-4">
-                            <span id="category-tag" class="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider">CATEGORY</span>
-                            <span id="date-info" class="text-xs text-slate-400">ARTICLE DATE</span>
-                        </div>
-                        
-                        <h2 id="article-title" class="text-2xl font-bold text-slate-900 leading-tight mb-4 tracking-tight">제목을 불러오는 중입니다.</h2>
-                        
-                        <div id="ai-content" class="space-y-6">
-                            <!-- Gemini 요약 내용 -->
-                        </div>
-
-                        <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
-                            <a id="source-link" href="#" target="_blank" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">원문 기사 보기 →</a>
-                            <p id="source-name" class="text-xs text-slate-400 font-medium text-right">출처 정보</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 아카이브 섹션 (지난 학습 목록) -->
-                <section class="mt-12">
-                    <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
-                        지난 학습 목록
-                    </h3>
-                    <div id="archive-list" class="space-y-3">
-                        <!-- 목록이 여기에 생성됨 -->
-                    </div>
-                </section>
-            </div>
-        </main>
-
-        <footer class="mt-12 text-center text-xs text-slate-400">
-            © 2024 AI Labor Law Newsroom. All rights reserved.
-        </footer>
+    <div id="loading" class="flex flex-col items-center justify-center py-20">
+      <div class="loader rounded-full border-4 border-t-4 border-slate-200 h-12 w-12 mb-4"></div>
+      <p class="text-slate-500">오늘의 학습 내용을 불러오고 있습니다...</p>
     </div>
 
-    <script>
-        const BASE_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
+    <main id="main-content" class="hidden">
+      <section class="bg-white rounded-3xl shadow-sm border border-violet-100 p-5 md:p-7 mb-8">
+        <div class="grid grid-cols-3 gap-3 mb-6">
+          <button onclick="selectTab('issue')" id="tab-issue" class="tab-btn rounded-2xl px-3 py-4 font-bold border transition">
+            이슈 공부하기
+          </button>
+          <button onclick="selectTab('case')" id="tab-case" class="tab-btn rounded-2xl px-3 py-4 font-bold border transition">
+            판례 공부하기
+          </button>
+          <button onclick="selectTab('study')" id="tab-study" class="tab-btn rounded-2xl px-3 py-4 font-bold border transition">
+            노동법 공부하기
+          </button>
+        </div>
 
-        const loadingEl = document.getElementById('loading');
-        const articleCard = document.getElementById('article-card');
-        const todayDateDisplay = document.getElementById('today-date-display');
-        const archiveList = document.getElementById('archive-list');
+        <div id="content-box" class="prose max-w-none"></div>
+      </section>
 
-        let allArticles = [];
+      <section class="mt-10">
+        <h3 class="text-xl font-bold mb-4 text-slate-900">지난 학습 목록</h3>
+        <div id="archive-list" class="space-y-3"></div>
+      </section>
+    </main>
 
-        // 오늘 날짜 표시
-        const today = new Date();
-        todayDateDisplay.textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일 오늘의 추천 학습`;
+    <footer class="mt-14 text-center text-xs text-slate-400">
+      © AI Labor Law Learning Archive
+    </footer>
+  </div>
 
-        // 1. 페이지 로드 시 전체 데이터 가져오기
-        async function init() {
-            showLoading(true);
-            try {
-                // 전체 목록을 가져오기 위해 mode=all 호출 (GAS에 해당 모드가 있어야 함)
-                // 만약 mode=all이 없다면 기본 random 호출 후 목록을 구성하도록 설계
-                const response = await fetch(`${BASE_URL}?mode=all`);
-                const result = await response.json();
+<script>
+const BASE_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
 
-                if (result.success && result.data && result.data.length > 0) {
-                    allArticles = result.data;
-                    
-                    // 1. 오늘의 학습 결정 (날짜 시드 기반)
-                    const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-                    const dailyIndex = dateSeed % allArticles.length;
-                    
-                    displayArticle(allArticles[dailyIndex]);
-                    
-                    // 2. 전체 목록 렌더링
-                    renderArchive(allArticles);
-                } else {
-                    // 데이터가 없을 경우 random이라도 시도
-                    const fallback = await fetch(`${BASE_URL}?mode=random`);
-                    const fallRes = await fallback.json();
-                    if(fallRes.success) displayArticle(fallRes.data);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                todayDateDisplay.textContent = "데이터를 불러올 수 없습니다.";
-            } finally {
-                showLoading(false);
-            }
-        }
+const loadingEl = document.getElementById("loading");
+const mainContent = document.getElementById("main-content");
+const todayDateDisplay = document.getElementById("today-date-display");
+const contentBox = document.getElementById("content-box");
+const archiveList = document.getElementById("archive-list");
 
-        function renderArchive(articles) {
-            archiveList.innerHTML = '';
-            // 최신순 정렬 (ID나 Timestamp 기준)
-            const sorted = [...articles].reverse();
-            
-            sorted.forEach((item, index) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = "bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-sm transition-all cursor-pointer flex justify-between items-center group";
-                itemDiv.onclick = () => {
-                    displayArticle(item);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                };
+let letters = [];
+let currentDay = null;
+let currentTab = "issue";
 
-                const dateStr = new Date(item.published_at).toLocaleDateString();
-                const typeLabel = item.type === 'case' ? '⚖️' : '📰';
+function formatKoreanDate(value) {
+  if (!value) return "날짜 없음";
 
-                itemDiv.innerHTML = `
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${dateStr}</span>
-                        <h4 class="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 line-clamp-1">${typeLabel} ${item.title}</h4>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-300 group-hover:text-indigo-400"><path d="m9 18 6-6-6-6"/></svg>
-                `;
-                archiveList.appendChild(itemDiv);
-            });
-        }
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [y, m, d] = value.split("-");
+    return `${Number(y)}년 ${Number(m)}월 ${Number(d)}일`;
+  }
 
-        function showLoading(isLoading) {
-            if (isLoading) {
-                articleCard.classList.add('hidden');
-                loadingEl.classList.remove('hidden');
-            } else {
-                loadingEl.classList.add('hidden');
-                articleCard.classList.remove('hidden');
-            }
-        }
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "날짜 없음";
 
-        function displayArticle(data) {
-            document.getElementById('article-title').textContent = data.title;
-            document.getElementById('date-info').textContent = new Date(data.published_at).toLocaleDateString();
-            document.getElementById('source-link').href = data.url;
-            document.getElementById('source-name').textContent = data.source;
-            
-            const categoryTag = document.getElementById('category-tag');
-            categoryTag.textContent = data.type === 'case' ? '⚖️ 판례 분석' : '📰 주요 이슈';
-            categoryTag.className = data.type === 'case' 
-                ? 'px-2.5 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-700 uppercase tracking-wider'
-                : 'px-2.5 py-0.5 rounded-md text-xs font-bold bg-blue-100 text-blue-700 uppercase tracking-wider';
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
 
-            const contentDiv = document.getElementById('ai-content');
-            contentDiv.innerHTML = '';
+function tabLabel(tab) {
+  if (tab === "issue") return "오늘의 노무 이슈";
+  if (tab === "case") return "오늘의 판례";
+  return "오늘의 노동법 공부";
+}
 
-            const c = data.content;
-            let parsedContent;
-            
-            try {
-                parsedContent = typeof c === 'string' ? JSON.parse(c) : c;
-            } catch(e) {
-                parsedContent = c;
-            }
-            
-            if (typeof parsedContent === 'object' && parsedContent !== null) {
-                contentDiv.innerHTML = `
-                    <div class="bg-indigo-50 p-4 rounded-xl border-l-4 border-indigo-500 text-left">
-                        <h4 class="text-xs font-bold text-indigo-600 mb-1 text-left">한줄요약</h4>
-                        <p class="text-slate-700 leading-relaxed text-sm font-medium text-left">${parsedContent.summary || '내용 없음'}</p>
-                    </div>
-                    <div class="text-left">
-                        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2 text-left">🔍 사건 배경</h4>
-                        <p class="text-slate-600 text-sm leading-relaxed text-left">${parsedContent.background || '내용 없음'}</p>
-                    </div>
-                    <div class="text-left">
-                        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2 text-left">💡 핵심 포인트</h4>
-                        <p class="text-slate-600 text-sm leading-relaxed text-left">${parsedContent.points || '내용 없음'}</p>
-                    </div>
-                    <div class="bg-slate-900 p-5 rounded-xl text-left">
-                        <h4 class="text-sm font-bold text-indigo-300 mb-2 flex items-center gap-2 text-left">🚀 HR 시사점</h4>
-                        <p class="text-slate-200 text-sm leading-relaxed font-normal text-left">${parsedContent.implications || '내용 없음'}</p>
-                    </div>
-                `;
-            } else {
-                contentDiv.innerHTML = `<p class="text-slate-600 leading-relaxed text-sm text-left">${c}</p>`;
-            }
-        }
+function setActiveTab(tab) {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.className = "tab-btn rounded-2xl px-3 py-4 font-bold border transition bg-white text-slate-600 border-slate-200 hover:border-violet-300";
+  });
 
-        window.onload = init;
-    </script>
+  const active = document.getElementById("tab-" + tab);
+  if (active) {
+    active.className = "tab-btn rounded-2xl px-3 py-4 font-bold border transition bg-violet-600 text-white border-violet-600 shadow-md";
+  }
+}
+
+function renderContent() {
+  setActiveTab(currentTab);
+
+  const item = currentDay ? currentDay[currentTab] : null;
+
+  if (!item) {
+    contentBox.innerHTML = `
+      <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100">
+        <h2 class="text-2xl font-bold text-violet-700 mb-3">${tabLabel(currentTab)}</h2>
+        <p class="text-slate-500">아직 발행된 내용이 없습니다.</p>
+      </div>
+    `;
+    return;
+  }
+
+  contentBox.innerHTML = `
+    <div class="mb-5">
+      <span class="inline-flex px-3 py-1 rounded-full bg-violet-100 text-violet-700 text-sm font-bold">
+        ${tabLabel(currentTab)}
+      </span>
+    </div>
+    ${item.body_html}
+  `;
+}
+
+function selectTab(tab) {
+  currentTab = tab;
+  renderContent();
+}
+
+function openDay(index) {
+  currentDay = letters[index];
+  currentTab = "issue";
+  todayDateDisplay.textContent = `${formatKoreanDate(currentDay.publish_date)} 오늘의 레터입니다.`;
+  renderContent();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderArchive() {
+  archiveList.innerHTML = "";
+
+  letters.forEach((day, index) => {
+    const isLatest = index === 0;
+    const div = document.createElement("div");
+    div.className = "bg-white rounded-2xl border border-violet-100 shadow-sm overflow-hidden";
+
+    div.innerHTML = `
+      <button onclick="openDay(${index})" class="w-full px-5 py-4 flex items-center justify-between hover:bg-violet-50 transition">
+        <div class="text-left">
+          <p class="font-bold text-slate-800">${formatKoreanDate(day.publish_date)}</p>
+          <p class="text-sm text-slate-400">${isLatest ? "현재 표시 중인 최신 레터" : "지난 레터 보기"}</p>
+        </div>
+        <span class="text-violet-500 font-bold">보기 →</span>
+      </button>
+    `;
+
+    archiveList.appendChild(div);
+  });
+}
+
+async function init() {
+  try {
+    const res = await fetch(BASE_URL);
+    const json = await res.json();
+
+    if (!json.success || !json.letters || json.letters.length === 0) {
+      todayDateDisplay.textContent = "아직 발행된 레터가 없습니다.";
+      loadingEl.classList.add("hidden");
+      return;
+    }
+
+    letters = json.letters;
+    currentDay = letters[0];
+
+    todayDateDisplay.textContent = `${formatKoreanDate(currentDay.publish_date)} 오늘의 레터입니다.`;
+
+    renderContent();
+    renderArchive();
+
+    loadingEl.classList.add("hidden");
+    mainContent.classList.remove("hidden");
+  } catch (e) {
+    console.error(e);
+    todayDateDisplay.textContent = "데이터를 불러올 수 없습니다.";
+    loadingEl.classList.add("hidden");
+  }
+}
+
+window.onload = init;
+</script>
 </body>
 </html>
