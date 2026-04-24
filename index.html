@@ -1,195 +1,341 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>오늘의 노무 학습</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-  <style>
-    body { font-family: "Pretendard Variable", Pretendard, sans-serif; }
-    .loader { border-top-color: #7c3aed; animation: spinner 1.2s linear infinite; }
-    @keyframes spinner { to { transform: rotate(360deg); } }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>오늘의 학습</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: linear-gradient(180deg, #f7f3ff 0%, #fbfaff 45%, #ffffff 100%);
+    color: #171428;
+  }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 36px 18px 70px;
+  }
+
+  .hero {
+    background: white;
+    border: 1px solid #eadfff;
+    border-radius: 28px;
+    padding: 38px 34px;
+    box-shadow: 0 20px 50px rgba(102, 51, 204, .08);
+    margin-bottom: 26px;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: #ede4ff;
+    color: #6b35d9;
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 42px;
+    line-height: 1.2;
+    letter-spacing: -1.2px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 24px 0;
+  }
+
+  .tab {
+    border: 1px solid #e1d6f8;
+    background: white;
+    border-radius: 20px;
+    padding: 20px 12px;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s;
+    color: #28213a;
+  }
+
+  .tab:hover {
+    transform: translateY(-2px);
+    border-color: #8b5cf6;
+  }
+
+  .tab.active {
+    background: #6d3be8;
+    color: white;
+    border-color: #6d3be8;
+    box-shadow: 0 14px 28px rgba(109, 59, 232, .2);
+  }
+
+  .panel {
+    background: white;
+    border: 1px solid #eadfff;
+    border-radius: 28px;
+    padding: 34px;
+    box-shadow: 0 18px 45px rgba(70, 45, 120, .07);
+  }
+
+  .panel-title {
+    color: #5d2ed1;
+    font-size: 28px;
+    margin: 0 0 24px;
+  }
+
+  article {
+    line-height: 1.9;
+    font-size: 16px;
+  }
+
+  article h2 {
+    color: #5d2ed1;
+  }
+
+  article h3 {
+    font-size: 24px;
+    line-height: 1.5;
+  }
+
+  article p {
+    margin-bottom: 18px;
+    white-space: pre-line;
+  }
+
+  article a {
+    color: #5d2ed1;
+    font-weight: 800;
+  }
+
+  .archive-title {
+    margin: 34px 0 14px;
+    font-size: 22px;
+    font-weight: 900;
+  }
+
+  .archive {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .archive button {
+    width: 100%;
+    text-align: left;
+    background: white;
+    border: 1px solid #eadfff;
+    border-radius: 18px;
+    padding: 18px 20px;
+    cursor: pointer;
+    font-weight: 800;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .archive button:hover {
+    background: #f5efff;
+  }
+
+  .loading,
+  .empty {
+    background: white;
+    border: 1px solid #eadfff;
+    border-radius: 24px;
+    padding: 40px;
+    text-align: center;
+    color: #6f6682;
+    font-weight: 700;
+  }
+
+  @media(max-width: 700px) {
+    h1 { font-size: 32px; }
+    .tabs { grid-template-columns: 1fr; }
+    .panel { padding: 24px; }
+  }
+</style>
 </head>
 
-<body class="bg-violet-50/40 text-slate-900 min-h-screen">
-  <div class="max-w-4xl mx-auto px-4 py-8">
+<body>
+<div class="wrap">
 
-    <header class="mb-8 text-center">
-      <div class="inline-block px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-4">
-        Daily Labor Law Learning
-      </div>
-      <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-2">오늘의 노무 학습</h1>
-      <p id="today-date-display" class="text-slate-500 font-medium"></p>
-    </header>
+  <section class="hero">
+    <div class="badge">Daily Labor Law Learning</div>
+    <h1 id="mainTitle">오늘의 노무 학습</h1>
+  </section>
 
-    <div id="loading" class="flex flex-col items-center justify-center py-20">
-      <div class="loader rounded-full border-4 border-t-4 border-slate-200 h-12 w-12 mb-4"></div>
-      <p class="text-slate-500">오늘의 학습 내용을 불러오고 있습니다...</p>
+  <div id="loading" class="loading">데이터를 불러오고 있습니다...</div>
+
+  <main id="app" style="display:none;">
+    <div class="tabs">
+      <button class="tab active" id="tab-issue" onclick="selectTab('issue')">이슈 공부하기</button>
+      <button class="tab" id="tab-case" onclick="selectTab('case')">판례 공부하기</button>
+      <button class="tab" id="tab-study" onclick="selectTab('study')">노동법 공부하기</button>
     </div>
 
-    <main id="main-content" class="hidden">
-      <section class="bg-white rounded-3xl shadow-sm border border-violet-100 p-5 md:p-7 mb-8">
-        <div class="grid grid-cols-3 gap-3 mb-6">
-          <button onclick="selectTab('issue')" id="tab-issue" class="tab-btn rounded-2xl px-3 py-4 font-bold border transition">
-            이슈 공부하기
-          </button>
-          <button onclick="selectTab('case')" id="tab-case" class="tab-btn rounded-2xl px-3 py-4 font-bold border transition">
-            판례 공부하기
-          </button>
-          <button onclick="selectTab('study')" id="tab-study" class="tab-btn rounded-2xl px-3 py-4 font-bold border transition">
-            노동법 공부하기
-          </button>
-        </div>
+    <section class="panel">
+      <h2 class="panel-title" id="sectionTitle">오늘의 노무 이슈</h2>
+      <div id="content"></div>
+    </section>
 
-        <div id="content-box" class="prose max-w-none"></div>
-      </section>
+    <h3 class="archive-title">지난 학습 목록</h3>
+    <div class="archive" id="archive"></div>
+  </main>
 
-      <section class="mt-10">
-        <h3 class="text-xl font-bold mb-4 text-slate-900">지난 학습 목록</h3>
-        <div id="archive-list" class="space-y-3"></div>
-      </section>
-    </main>
-
-    <footer class="mt-14 text-center text-xs text-slate-400">
-      © AI Labor Law Learning Archive
-    </footer>
-  </div>
+</div>
 
 <script>
-const BASE_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
-
-const loadingEl = document.getElementById("loading");
-const mainContent = document.getElementById("main-content");
-const todayDateDisplay = document.getElementById("today-date-display");
-const contentBox = document.getElementById("content-box");
-const archiveList = document.getElementById("archive-list");
+const API_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
 
 let letters = [];
 let currentDay = null;
 let currentTab = "issue";
 
-function formatKoreanDate(value) {
-  if (!value) return "날짜 없음";
+function formatDate(v) {
+  if (!v) return "날짜 없음";
 
-  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    const [y, m, d] = value.split("-");
+  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}/.test(v)) {
+    const [y, m, d] = v.substring(0, 10).split("-");
     return `${Number(y)}년 ${Number(m)}월 ${Number(d)}일`;
   }
 
-  const date = new Date(value);
-  if (isNaN(date.getTime())) return "날짜 없음";
+  const dt = new Date(v);
+  if (isNaN(dt)) return "날짜 없음";
 
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+  return `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
 }
 
-function tabLabel(tab) {
+function label(tab) {
   if (tab === "issue") return "오늘의 노무 이슈";
   if (tab === "case") return "오늘의 판례";
   return "오늘의 노동법 공부";
 }
 
-function setActiveTab(tab) {
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.className = "tab-btn rounded-2xl px-3 py-4 font-bold border transition bg-white text-slate-600 border-slate-200 hover:border-violet-300";
-  });
+function normalizeResponse(json) {
+  if (json.letters) return json.letters;
 
-  const active = document.getElementById("tab-" + tab);
-  if (active) {
-    active.className = "tab-btn rounded-2xl px-3 py-4 font-bold border transition bg-violet-600 text-white border-violet-600 shadow-md";
+  if (json.data) {
+    const grouped = {};
+
+    json.data.forEach(item => {
+      const d = item.publish_date || item.published_at || item.date || "";
+      const date = String(d).substring(0, 10);
+      const section = item.section || item.type;
+
+      if (!grouped[date]) {
+        grouped[date] = {
+          publish_date: date,
+          issue: null,
+          case: null,
+          study: null
+        };
+      }
+
+      grouped[date][section] = {
+        title: item.title,
+        body_html: item.body_html || item.content || "",
+        source_url: item.source_url || item.url || ""
+      };
+    });
+
+    return Object.values(grouped)
+      .sort((a, b) => String(b.publish_date).localeCompare(String(a.publish_date)));
   }
-}
 
-function renderContent() {
-  setActiveTab(currentTab);
-
-  const item = currentDay ? currentDay[currentTab] : null;
-
-  if (!item) {
-    contentBox.innerHTML = `
-      <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100">
-        <h2 class="text-2xl font-bold text-violet-700 mb-3">${tabLabel(currentTab)}</h2>
-        <p class="text-slate-500">아직 발행된 내용이 없습니다.</p>
-      </div>
-    `;
-    return;
-  }
-
-  contentBox.innerHTML = `
-    <div class="mb-5">
-      <span class="inline-flex px-3 py-1 rounded-full bg-violet-100 text-violet-700 text-sm font-bold">
-        ${tabLabel(currentTab)}
-      </span>
-    </div>
-    ${item.body_html}
-  `;
-}
-
-function selectTab(tab) {
-  currentTab = tab;
-  renderContent();
-}
-
-function openDay(index) {
-  currentDay = letters[index];
-  currentTab = "issue";
-  todayDateDisplay.textContent = `${formatKoreanDate(currentDay.publish_date)} 오늘의 레터입니다.`;
-  renderContent();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function renderArchive() {
-  archiveList.innerHTML = "";
-
-  letters.forEach((day, index) => {
-    const isLatest = index === 0;
-    const div = document.createElement("div");
-    div.className = "bg-white rounded-2xl border border-violet-100 shadow-sm overflow-hidden";
-
-    div.innerHTML = `
-      <button onclick="openDay(${index})" class="w-full px-5 py-4 flex items-center justify-between hover:bg-violet-50 transition">
-        <div class="text-left">
-          <p class="font-bold text-slate-800">${formatKoreanDate(day.publish_date)}</p>
-          <p class="text-sm text-slate-400">${isLatest ? "현재 표시 중인 최신 레터" : "지난 레터 보기"}</p>
-        </div>
-        <span class="text-violet-500 font-bold">보기 →</span>
-      </button>
-    `;
-
-    archiveList.appendChild(div);
-  });
+  return [];
 }
 
 async function init() {
   try {
-    const res = await fetch(BASE_URL);
+    const res = await fetch(API_URL + "?t=" + Date.now());
     const json = await res.json();
 
-    if (!json.success || !json.letters || json.letters.length === 0) {
-      todayDateDisplay.textContent = "아직 발행된 레터가 없습니다.";
-      loadingEl.classList.add("hidden");
-      return;
-    }
+    letters = normalizeResponse(json);
 
-    letters = json.letters;
+    if (!letters.length) throw new Error("empty data");
+
     currentDay = letters[0];
 
-    todayDateDisplay.textContent = `${formatKoreanDate(currentDay.publish_date)} 오늘의 레터입니다.`;
+    document.getElementById("mainTitle").textContent =
+      `${formatDate(currentDay.publish_date)} 오늘의 학습`;
 
-    renderContent();
+    render();
     renderArchive();
 
-    loadingEl.classList.add("hidden");
-    mainContent.classList.remove("hidden");
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("app").style.display = "block";
   } catch (e) {
+    document.getElementById("loading").innerHTML =
+      "데이터를 불러올 수 없습니다.<br>Apps Script 배포 권한이 '모든 사용자'인지 확인해주세요.";
     console.error(e);
-    todayDateDisplay.textContent = "데이터를 불러올 수 없습니다.";
-    loadingEl.classList.add("hidden");
   }
 }
 
-window.onload = init;
+function selectTab(tab) {
+  currentTab = tab;
+
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("tab-" + tab).classList.add("active");
+
+  render();
+}
+
+function render() {
+  document.getElementById("sectionTitle").textContent = label(currentTab);
+
+  const item = currentDay && currentDay[currentTab];
+
+  if (!item) {
+    document.getElementById("content").innerHTML =
+      `<div class="empty">아직 발행된 내용이 없습니다.</div>`;
+    return;
+  }
+
+  document.getElementById("content").innerHTML =
+    item.body_html || `<article><h3>${item.title || ""}</h3><p>내용이 없습니다.</p></article>`;
+}
+
+function renderArchive() {
+  const box = document.getElementById("archive");
+  box.innerHTML = "";
+
+  letters.forEach((day) => {
+    const btn = document.createElement("button");
+
+    btn.innerHTML = `
+      <span>${formatDate(day.publish_date)}</span>
+      <span>보기 →</span>
+    `;
+
+    btn.onclick = () => {
+      currentDay = day;
+      currentTab = "issue";
+
+      document.getElementById("mainTitle").textContent =
+        `${formatDate(day.publish_date)} 오늘의 학습`;
+
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.getElementById("tab-issue").classList.add("active");
+
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    box.appendChild(btn);
+  });
+}
+
+init();
 </script>
 </body>
 </html>
