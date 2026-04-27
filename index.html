@@ -294,7 +294,15 @@ function renderArchive() {
   const box = document.getElementById("archive");
   box.innerHTML = "";
 
-  letters.forEach(function(day) {
+  // 첫 번째 데이터는 현재 메인에 표시되는 최신 레터이므로 제외
+  const pastLetters = letters.slice(1);
+
+  if (pastLetters.length === 0) {
+    box.innerHTML = '<div class="empty">아직 지난 학습 목록이 없습니다.</div>';
+    return;
+  }
+
+  pastLetters.forEach(function(day) {
     const btn = document.createElement("button");
 
     btn.innerHTML =
@@ -320,7 +328,6 @@ function renderArchive() {
     box.appendChild(btn);
   });
 }
-
 init();
 </script>
 </body>
