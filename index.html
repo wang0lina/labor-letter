@@ -191,6 +191,15 @@ function cleanBodyHtml(html) {
       p.remove();
       return;
     }
+    // 🔥 중복 제목 제거
+    if (
+      trimmed === "오늘의 노무 이슈" ||
+      trimmed === "오늘의 판례" ||
+      trimmed === "오늘의 노동법 공부"
+    ) {
+      p.remove();
+      return;
+    }
 
     text = removeLongUrls(text).trim();
 
