@@ -5,183 +5,107 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>오늘의 학습</title>
 <style>
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-    background: linear-gradient(180deg, #f7f3ff 0%, #fbfaff 45%, #ffffff 100%);
-    color: #171428;
-  }
-
-  .wrap {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 36px 18px 70px;
-  }
-
-  .hero {
-    background: white;
-    border: 1px solid #eadfff;
-    border-radius: 28px;
-    padding: 38px 34px;
-    box-shadow: 0 20px 50px rgba(102, 51, 204, .08);
-    margin-bottom: 26px;
-    text-align: center;
-  }
-
-  .badge {
-    display: inline-block;
-    padding: 8px 16px;
-    border-radius: 999px;
-    background: #ede4ff;
-    color: #6b35d9;
-    font-weight: 800;
-    font-size: 14px;
-    margin-bottom: 18px;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 42px;
-    line-height: 1.2;
-    letter-spacing: -1.2px;
-  }
-
-  .tabs {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin: 24px 0;
-  }
-
-  .tab {
-    border: 1px solid #e1d6f8;
-    background: white;
-    border-radius: 20px;
-    padding: 20px 12px;
-    font-size: 18px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: .2s;
-    color: #28213a;
-  }
-
-  .tab:hover {
-    transform: translateY(-2px);
-    border-color: #8b5cf6;
-  }
-
-  .tab.active {
-    background: #6d3be8;
-    color: white;
-    border-color: #6d3be8;
-    box-shadow: 0 14px 28px rgba(109, 59, 232, .2);
-  }
-
-  .panel {
-    background: white;
-    border: 1px solid #eadfff;
-    border-radius: 28px;
-    padding: 34px;
-    box-shadow: 0 18px 45px rgba(70, 45, 120, .07);
-  }
-
-  .panel-title {
-    color: #5d2ed1;
-    font-size: 28px;
-    margin: 0 0 24px;
-  }
-
-  article {
-    line-height: 1.9;
-    font-size: 16px;
-  }
-
-  article h2 {
-    color: #5d2ed1;
-  }
-
-  article h3 {
-    font-size: 24px;
-    line-height: 1.5;
-  }
-
-  article p {
-    margin-bottom: 18px;
-    white-space: pre-line;
-    overflow-wrap: anywhere;
-  }
-
-  article a {
-    color: #5d2ed1;
-    font-weight: 800;
-  }
-
-  .cta {
-    display: inline-block;
-    margin-top: 26px;
-    padding: 13px 20px;
-    border-radius: 14px;
-    background: #6d3be8;
-    color: white !important;
-    text-decoration: none;
-    font-weight: 900;
-    box-shadow: 0 12px 24px rgba(109, 59, 232, .22);
-  }
-
-  .archive-title {
-    margin: 34px 0 14px;
-    font-size: 22px;
-    font-weight: 900;
-  }
-
-  .archive {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .archive button {
-    width: 100%;
-    text-align: left;
-    background: white;
-    border: 1px solid #eadfff;
-    border-radius: 18px;
-    padding: 18px 20px;
-    cursor: pointer;
-    font-weight: 800;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .archive button:hover {
-    background: #f5efff;
-  }
-
-  .loading,
-  .empty {
-    background: white;
-    border: 1px solid #eadfff;
-    border-radius: 24px;
-    padding: 40px;
-    text-align: center;
-    color: #6f6682;
-    font-weight: 700;
-  }
-
-  @media(max-width: 700px) {
-    h1 { font-size: 32px; }
-    .tabs { grid-template-columns: 1fr; }
-    .panel { padding: 24px; }
-  }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: linear-gradient(180deg, #f7f3ff 0%, #fbfaff 45%, #ffffff 100%);
+  color: #171428;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 36px 18px 70px; }
+.hero {
+  background: white;
+  border: 1px solid #eadfff;
+  border-radius: 28px;
+  padding: 38px 34px;
+  box-shadow: 0 20px 50px rgba(102, 51, 204, .08);
+  margin-bottom: 26px;
+  text-align: center;
+}
+.badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #ede4ff;
+  color: #6b35d9;
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+h1 { margin: 0; font-size: 42px; line-height: 1.2; letter-spacing: -1.2px; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
+.tab {
+  border: 1px solid #e1d6f8;
+  background: white;
+  border-radius: 20px;
+  padding: 20px 12px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: .2s;
+  color: #28213a;
+}
+.tab.active {
+  background: #6d3be8;
+  color: white;
+  border-color: #6d3be8;
+  box-shadow: 0 14px 28px rgba(109, 59, 232, .2);
+}
+.panel {
+  background: white;
+  border: 1px solid #eadfff;
+  border-radius: 28px;
+  padding: 34px;
+  box-shadow: 0 18px 45px rgba(70, 45, 120, .07);
+}
+.panel-title { color: #5d2ed1; font-size: 28px; margin: 0 0 24px; }
+article { line-height: 1.9; font-size: 16px; }
+article h2 { color: #5d2ed1; }
+article h3 { font-size: 24px; line-height: 1.5; }
+article p { margin-bottom: 18px; white-space: pre-line; overflow-wrap: anywhere; }
+.cta {
+  display: inline-block;
+  margin-top: 26px;
+  padding: 13px 20px;
+  border-radius: 14px;
+  background: #6d3be8;
+  color: white;
+  text-decoration: none;
+  font-weight: 900;
+}
+.archive-title { margin: 34px 0 14px; font-size: 22px; font-weight: 900; }
+.archive { display: flex; flex-direction: column; gap: 10px; }
+.archive button {
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: 1px solid #eadfff;
+  border-radius: 18px;
+  padding: 18px 20px;
+  cursor: pointer;
+  font-weight: 800;
+  display: flex;
+  justify-content: space-between;
+}
+.loading, .empty {
+  background: white;
+  border: 1px solid #eadfff;
+  border-radius: 24px;
+  padding: 40px;
+  text-align: center;
+  color: #6f6682;
+  font-weight: 700;
+}
+@media(max-width: 700px) {
+  h1 { font-size: 32px; }
+  .tabs { grid-template-columns: 1fr; }
+  .panel { padding: 24px; }
+}
 </style>
 </head>
 
 <body>
 <div class="wrap">
-
   <section class="hero">
     <div class="badge">Daily Labor Law Learning</div>
     <h1 id="mainTitle">오늘의 노무 학습</h1>
@@ -204,7 +128,6 @@
     <h3 class="archive-title">지난 학습 목록</h3>
     <div class="archive" id="archive"></div>
   </main>
-
 </div>
 
 <script>
@@ -216,16 +139,12 @@ let currentTab = "issue";
 
 function formatDate(v) {
   if (!v) return "날짜 없음";
-
-  if (typeof v === "string" && /^\\d{4}-\\d{2}-\\d{2}/.test(v)) {
-    const parts = v.substring(0, 10).split("-");
-    return `${Number(parts[0])}년 ${Number(parts[1])}월 ${Number(parts[2])}일`;
+  const str = String(v).substring(0, 10);
+  const parts = str.split("-");
+  if (parts.length === 3) {
+    return Number(parts[0]) + "년 " + Number(parts[1]) + "월 " + Number(parts[2]) + "일";
   }
-
-  const dt = new Date(v);
-  if (isNaN(dt.getTime())) return "날짜 없음";
-
-  return `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
+  return str;
 }
 
 function label(tab) {
@@ -234,95 +153,91 @@ function label(tab) {
   return "오늘의 노동법 공부";
 }
 
+function decodeHtml(text) {
+  const box = document.createElement("textarea");
+  box.innerHTML = text || "";
+  return box.value;
+}
+
+function removeLongUrls(text) {
+  const words = String(text || "").split(/\s+/);
+  return words.filter(function(word) {
+    return word.indexOf("http://") !== 0 && word.indexOf("https://") !== 0;
+  }).join(" ");
+}
+
+function cleanBodyHtml(html) {
+  const decoded = decodeHtml(html || "");
+  const temp = document.createElement("div");
+  temp.innerHTML = decoded;
+
+  const links = temp.querySelectorAll("a");
+  links.forEach(function(a) {
+    const text = document.createTextNode(a.textContent || "");
+    a.parentNode.replaceChild(text, a);
+  });
+
+  const fonts = temp.querySelectorAll("font");
+  fonts.forEach(function(f) {
+    const text = document.createTextNode(f.textContent || "");
+    f.parentNode.replaceChild(text, f);
+  });
+
+  const paragraphs = temp.querySelectorAll("p");
+  paragraphs.forEach(function(p) {
+    const t = p.textContent || "";
+    if (t.trim().indexOf("원문:") === 0) {
+      p.remove();
+    } else {
+      p.textContent = removeLongUrls(t);
+    }
+  });
+
+  return temp.innerHTML;
+}
+
 function normalizeResponse(json) {
   if (json && Array.isArray(json.letters)) return json.letters;
-
-  if (json && Array.isArray(json.data)) {
-    const grouped = {};
-
-    json.data.forEach(item => {
-      const d = item.publish_date || item.published_at || item.date || "";
-      const date = String(d).substring(0, 10);
-      const section = item.section || item.type;
-
-      if (!grouped[date]) {
-        grouped[date] = {
-          publish_date: date,
-          issue: null,
-          case: null,
-          study: null
-        };
-      }
-
-      grouped[date][section] = {
-        title: item.title,
-        body_html: item.body_html || item.content || "",
-        source_url: item.source_url || item.url || ""
-      };
-    });
-
-    return Object.values(grouped)
-      .sort((a, b) => String(b.publish_date).localeCompare(String(a.publish_date)));
-  }
-
   return [];
-}
-
-function decodeHtml(text) {
-  const textarea = document.createElement("textarea");
-  textarea.innerHTML = text || "";
-  return textarea.value;
-}
-
-function cleanArticleHtml(html) {
-  if (!html) return "";
-
-  let cleaned = decodeHtml(html);
-
-  cleaned = cleaned.replace(/<a[^>]*>(.*?)<\\/a>/gi, "$1");
-  cleaned = cleaned.replace(/<font[^>]*>/gi, "");
-  cleaned = cleaned.replace(/<\\/font>/gi, "");
-
-  cleaned = cleaned.replace(/원문:\\s*https?:\\/\\/[^\\s<]+/gi, "");
-  cleaned = cleaned.replace(/https?:\\/\\/[^\\s<]+/gi, "");
-
-  cleaned = cleaned.replace(/<p[^>]*>\\s*원문:\\s*<\\/p>/gi, "");
-  cleaned = cleaned.replace(/<p[^>]*>\\s*<\\/p>/gi, "");
-
-  return cleaned;
 }
 
 function getSourceUrl(item) {
   if (!item) return "";
   if (item.source_url) return item.source_url;
 
-  const html = item.body_html || "";
-  const match = html.match(/href=['"]([^'"]+)['"]/i);
-  return match ? match[1] : "";
+  const decoded = decodeHtml(item.body_html || "");
+  const temp = document.createElement("div");
+  temp.innerHTML = decoded;
+  const a = temp.querySelector("a");
+  return a ? a.href : "";
 }
 
 async function init() {
+  const loading = document.getElementById("loading");
+
   try {
     const res = await fetch(API_URL + "?t=" + Date.now());
     const json = await res.json();
 
     letters = normalizeResponse(json);
 
-    if (!letters.length) throw new Error("발행된 데이터가 없습니다.");
+    if (!letters.length) {
+      loading.innerHTML = "발행된 데이터가 없습니다.";
+      return;
+    }
 
     currentDay = letters[0];
 
     document.getElementById("mainTitle").textContent =
-      `${formatDate(currentDay.publish_date)} 오늘의 학습`;
+      formatDate(currentDay.publish_date) + " 오늘의 학습";
 
     render();
     renderArchive();
 
-    document.getElementById("loading").style.display = "none";
+    loading.style.display = "none";
     document.getElementById("app").style.display = "block";
   } catch (e) {
-    document.getElementById("loading").innerHTML =
-      "데이터를 불러올 수 없습니다.<br>" + e.message;
+    loading.innerHTML = "데이터를 불러올 수 없습니다.<br>" + e.message;
     console.error(e);
   }
 }
@@ -330,9 +245,11 @@ async function init() {
 function selectTab(tab) {
   currentTab = tab;
 
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  document.getElementById("tab-" + tab).classList.add("active");
+  document.querySelectorAll(".tab").forEach(function(t) {
+    t.classList.remove("active");
+  });
 
+  document.getElementById("tab-" + tab).classList.add("active");
   render();
 }
 
@@ -343,41 +260,42 @@ function render() {
 
   if (!item) {
     document.getElementById("content").innerHTML =
-      `<div class="empty">아직 발행된 내용이 없습니다.</div>`;
+      '<div class="empty">아직 발행된 내용이 없습니다.</div>';
     return;
   }
 
   const url = getSourceUrl(item);
+  const body = cleanBodyHtml(item.body_html);
+
   const cta = url
-    ? `<p><a class="cta" href="${url}" target="_blank" rel="noopener noreferrer">원문보기 →</a></p>`
+    ? '<p><a class="cta" href="' + url + '" target="_blank" rel="noopener noreferrer">원문보기 →</a></p>'
     : "";
 
-  const body = cleanArticleHtml(item.body_html);
-
   document.getElementById("content").innerHTML =
-    `<article>${body}${cta}</article>`;
+    "<article>" + body + cta + "</article>";
 }
 
 function renderArchive() {
   const box = document.getElementById("archive");
   box.innerHTML = "";
 
-  letters.forEach((day) => {
+  letters.forEach(function(day) {
     const btn = document.createElement("button");
 
-    btn.innerHTML = `
-      <span>${formatDate(day.publish_date)}</span>
-      <span>보기 →</span>
-    `;
+    btn.innerHTML =
+      "<span>" + formatDate(day.publish_date) + "</span><span>보기 →</span>";
 
-    btn.onclick = () => {
+    btn.onclick = function() {
       currentDay = day;
       currentTab = "issue";
 
       document.getElementById("mainTitle").textContent =
-        `${formatDate(day.publish_date)} 오늘의 학습`;
+        formatDate(day.publish_date) + " 오늘의 학습";
 
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(function(t) {
+        t.classList.remove("active");
+      });
+
       document.getElementById("tab-issue").classList.add("active");
 
       render();
