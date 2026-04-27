@@ -63,16 +63,7 @@ article { line-height: 1.9; font-size: 16px; }
 article h2 { color: #5d2ed1; }
 article h3 { font-size: 24px; line-height: 1.5; }
 article p { margin-bottom: 18px; white-space: pre-line; overflow-wrap: anywhere; }
-.cta {
-  display: inline-block;
-  margin-top: 26px;
-  padding: 13px 20px;
-  border-radius: 14px;
-  background: #6d3be8;
-  color: white;
-  text-decoration: none;
-  font-weight: 900;
-}
+article strong { font-weight: 900; color: #171428; }
 .cta {
   display: inline-block;
   margin-top: 26px;
@@ -182,25 +173,38 @@ function cleanBodyHtml(html) {
   const temp = document.createElement("div");
   temp.innerHTML = decoded;
 
-  const links = temp.querySelectorAll("a");
-  links.forEach(function(a) {
+  temp.querySelectorAll("a").forEach(function(a) {
     const text = document.createTextNode(a.textContent || "");
     a.parentNode.replaceChild(text, a);
   });
 
-  const fonts = temp.querySelectorAll("font");
-  fonts.forEach(function(f) {
+  temp.querySelectorAll("font").forEach(function(f) {
     const text = document.createTextNode(f.textContent || "");
     f.parentNode.replaceChild(text, f);
   });
 
-  const paragraphs = temp.querySelectorAll("p");
-  paragraphs.forEach(function(p) {
-    const t = p.textContent || "";
-    if (t.trim().indexOf("원문:") === 0) {
+  temp.querySelectorAll("p").forEach(function(p) {
+    let text = p.textContent || "";
+    const trimmed = text.trim();
+
+    if (trimmed === "원문 보기" || trimmed === "원문보기" || trimmed.indexOf("원문:") === 0) {
       p.remove();
+      return;
+    }
+
+    text = removeLongUrls(text).trim();
+
+    const match = text.match(/^(\d+\.\s[^\n]+)\n?([\s\S]*)$/);
+
+    if (match) {
+      const heading = match[1].trim();
+      const body = match[2].trim();
+
+      p.innerHTML = body
+        ? "<strong>" + heading + "</strong><br><br>" + body
+        : "<strong>" + heading + "</strong>";
     } else {
-      p.textContent = removeLongUrls(t);
+      p.textContent = text;
     }
   });
 
@@ -241,64 +245,7 @@ async function init() {
 
     document.getElementById("mainTitle").textContent =
       formatDate(currentDay.publish_date) + " 오늘의 학습";
-function decodeHtml(text) {
-  const box = document.createElement("textarea");
-  box.innerHTML = text || "";
-  return box.value;
-}
 
-function cleanBodyHtml(html) {
-  const decoded = decodeHtml(html || "");
-  const temp = document.createElement("div");
-  temp.innerHTML = decoded;
-
-  temp.querySelectorAll("a").forEach(a => {
-    const text = document.createTextNode(a.textContent || "");
-    a.parentNode.replaceChild(text, a);
-  });
-
-  temp.querySelectorAll("font").forEach(f => {
-    const text = document.createTextNode(f.textContent || "");
-    f.parentNode.replaceChild(text, f);
-  });
-
-  temp.querySelectorAll("p").forEach(p => {
-    let text = p.textContent || "";
-
-    if (text.trim() === "원문 보기" || text.trim().startsWith("원문:")) {
-      p.remove();
-      return;
-    }
-
-    text = text.replace(/https?:\/\/\S+/g, "").trim();
-
-    const match = text.match(/^(\d+\.\s[^\\n]+)\n?([\s\S]*)$/);
-
-    if (match) {
-      const heading = match[1].trim();
-      const body = match[2].trim();
-
-      p.innerHTML = body
-        ? `<strong>${heading}</strong><br><br>${body}`
-        : `<strong>${heading}</strong>`;
-    } else {
-      p.textContent = text;
-    }
-  });
-
-  return temp.innerHTML;
-}
-
-function getSourceUrl(item) {
-  if (!item) return "";
-  if (item.source_url) return item.source_url;
-
-  const decoded = decodeHtml(item.body_html || "");
-  const temp = document.createElement("div");
-  temp.innerHTML = decoded;
-  const a = temp.querySelector("a");
-  return a ? a.href : "";
-}
     render();
     renderArchive();
 
@@ -328,7 +275,7 @@ function render() {
 
   if (!item) {
     document.getElementById("content").innerHTML =
-      `<div class="empty">아직 발행된 내용이 없습니다.</div>`;
+      '<div class="empty">아직 발행된 내용이 없습니다.</div>';
     return;
   }
 
@@ -336,11 +283,11 @@ function render() {
   const body = cleanBodyHtml(item.body_html);
 
   const cta = url
-    ? `<p><a class="cta" href="${url}" target="_blank" rel="noopener noreferrer">원문보기 →</a></p>`
+    ? '<p><a class="cta" href="' + url + '" target="_blank" rel="noopener noreferrer">원문보기 →</a></p>'
     : "";
 
   document.getElementById("content").innerHTML =
-    `<article>${body}${cta}</article>`;
+    "<article>" + body + cta + "</article>";
 }
 
 function renderArchive() {
