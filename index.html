@@ -110,11 +110,24 @@
   article p {
     margin-bottom: 18px;
     white-space: pre-line;
+    overflow-wrap: anywhere;
   }
 
   article a {
     color: #5d2ed1;
     font-weight: 800;
+  }
+
+  .cta {
+    display: inline-block;
+    margin-top: 26px;
+    padding: 13px 20px;
+    border-radius: 14px;
+    background: #6d3be8;
+    color: white !important;
+    text-decoration: none;
+    font-weight: 900;
+    box-shadow: 0 12px 24px rgba(109, 59, 232, .22);
   }
 
   .archive-title {
@@ -204,13 +217,13 @@ let currentTab = "issue";
 function formatDate(v) {
   if (!v) return "날짜 없음";
 
-  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}/.test(v)) {
-    const [y, m, d] = v.substring(0, 10).split("-");
-    return `${Number(y)}년 ${Number(m)}월 ${Number(d)}일`;
+  if (typeof v === "string" && /^\\d{4}-\\d{2}-\\d{2}/.test(v)) {
+    const parts = v.substring(0, 10).split("-");
+    return `${Number(parts[0])}년 ${Number(parts[1])}월 ${Number(parts[2])}일`;
   }
 
   const dt = new Date(v);
-  if (isNaN(dt)) return "날짜 없음";
+  if (isNaN(dt.getTime())) return "날짜 없음";
 
   return `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
 }
@@ -222,9 +235,9 @@ function label(tab) {
 }
 
 function normalizeResponse(json) {
-  if (json.letters) return json.letters;
+  if (json && Array.isArray(json.letters)) return json.letters;
 
-  if (json.data) {
+  if (json && Array.isArray(json.data)) {
     const grouped = {};
 
     json.data.forEach(item => {
@@ -255,6 +268,39 @@ function normalizeResponse(json) {
   return [];
 }
 
+function decodeHtml(text) {
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = text || "";
+  return textarea.value;
+}
+
+function cleanArticleHtml(html) {
+  if (!html) return "";
+
+  let cleaned = decodeHtml(html);
+
+  cleaned = cleaned.replace(/<a[^>]*>(.*?)<\\/a>/gi, "$1");
+  cleaned = cleaned.replace(/<font[^>]*>/gi, "");
+  cleaned = cleaned.replace(/<\\/font>/gi, "");
+
+  cleaned = cleaned.replace(/원문:\\s*https?:\\/\\/[^\\s<]+/gi, "");
+  cleaned = cleaned.replace(/https?:\\/\\/[^\\s<]+/gi, "");
+
+  cleaned = cleaned.replace(/<p[^>]*>\\s*원문:\\s*<\\/p>/gi, "");
+  cleaned = cleaned.replace(/<p[^>]*>\\s*<\\/p>/gi, "");
+
+  return cleaned;
+}
+
+function getSourceUrl(item) {
+  if (!item) return "";
+  if (item.source_url) return item.source_url;
+
+  const html = item.body_html || "";
+  const match = html.match(/href=['"]([^'"]+)['"]/i);
+  return match ? match[1] : "";
+}
+
 async function init() {
   try {
     const res = await fetch(API_URL + "?t=" + Date.now());
@@ -262,7 +308,7 @@ async function init() {
 
     letters = normalizeResponse(json);
 
-    if (!letters.length) throw new Error("empty data");
+    if (!letters.length) throw new Error("발행된 데이터가 없습니다.");
 
     currentDay = letters[0];
 
@@ -276,7 +322,7 @@ async function init() {
     document.getElementById("app").style.display = "block";
   } catch (e) {
     document.getElementById("loading").innerHTML =
-      "데이터를 불러올 수 없습니다.<br>Apps Script 배포 권한이 '모든 사용자'인지 확인해주세요.";
+      "데이터를 불러올 수 없습니다.<br>" + e.message;
     console.error(e);
   }
 }
@@ -301,59 +347,15 @@ function render() {
     return;
   }
 
-  function cleanHtml(html) {
-  if (!html) return "";
-
-  // 1. a 태그 제거 (텍스트만 남김)
-  let cleaned = html.replace(/<a[^>]*>(.*?)<\/a>/gi, "$1");
-
-  // 2. font 태그 제거
-  cleaned = cleaned.replace(/<font[^>]*>/gi, "").replace(/<\/font>/gi, "");
-
-  // 3. 긴 URL 제거
-  cleaned = cleaned.replace(/https?:\/\/[^\s<]+/g, "");
-
-  return cleaned;
-}
-
-function render() {
-  document.getElementById("sectionTitle").textContent = label(currentTab);
-
-  const item = currentDay && currentDay[currentTab];
-
-  if (!item) {
-    document.getElementById("content").innerHTML =
-      `<div class="empty">아직 발행된 내용이 없습니다.</div>`;
-    return;
-  }
-
-  const cleanedHtml = cleanHtml(item.body_html);
-
-  // CTA 버튼 (원문보기)
-  const cta = item.source_url
-    ? `<div style="margin-top:28px;">
-         <a href="${item.source_url}" target="_blank"
-            style="
-              display:inline-block;
-              padding:14px 22px;
-              border-radius:12px;
-              background:#6d3be8;
-              color:white;
-              font-weight:800;
-              text-decoration:none;
-              box-shadow:0 8px 18px rgba(109,59,232,.25);
-            ">
-            원문보기 →
-         </a>
-       </div>`
+  const url = getSourceUrl(item);
+  const cta = url
+    ? `<p><a class="cta" href="${url}" target="_blank" rel="noopener noreferrer">원문보기 →</a></p>`
     : "";
 
+  const body = cleanArticleHtml(item.body_html);
+
   document.getElementById("content").innerHTML =
-    `<article>
-      <h3>${item.title || ""}</h3>
-      ${cleanedHtml}
-      ${cta}
-    </article>`;
+    `<article>${body}${cta}</article>`;
 }
 
 function renderArchive() {
