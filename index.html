@@ -1,184 +1,324 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>오늘의 학습</title>
-
 <style>
+* { box-sizing: border-box; }
 body {
-  font-family: sans-serif;
-  background:#f6f4ff;
-  margin:0;
+  margin: 0;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: linear-gradient(180deg, #f7f3ff 0%, #fbfaff 45%, #ffffff 100%);
+  color: #171428;
 }
-
-.wrap {
-  max-width:900px;
-  margin:0 auto;
-  padding:30px;
+.wrap { max-width: 980px; margin: 0 auto; padding: 36px 18px 70px; }
+.hero {
+  background: white;
+  border: 1px solid #eadfff;
+  border-radius: 28px;
+  padding: 38px 34px;
+  box-shadow: 0 20px 50px rgba(102, 51, 204, .08);
+  margin-bottom: 26px;
+  text-align: center;
 }
-
-h1 {
-  text-align:center;
+.badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #ede4ff;
+  color: #6b35d9;
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 18px;
 }
-
-.tabs {
-  display:flex;
-  gap:10px;
-  margin:20px 0;
-}
-
+h1 { margin: 0; font-size: 42px; line-height: 1.2; letter-spacing: -1.2px; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
 .tab {
-  flex:1;
-  padding:14px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  cursor:pointer;
+  border: 1px solid #e1d6f8;
+  background: white;
+  border-radius: 20px;
+  padding: 20px 12px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: .2s;
+  color: #28213a;
 }
-
 .tab.active {
-  background:#6d3be8;
-  color:#fff;
+  background: #6d3be8;
+  color: white;
+  border-color: #6d3be8;
+  box-shadow: 0 14px 28px rgba(109, 59, 232, .2);
 }
-
-.card {
-  background:#fff;
-  padding:25px;
-  border-radius:14px;
-  margin-top:20px;
-  line-height:1.8;
+.panel {
+  background: white;
+  border: 1px solid #eadfff;
+  border-radius: 28px;
+  padding: 34px;
+  box-shadow: 0 18px 45px rgba(70, 45, 120, .07);
 }
-
-.section-title {
-  font-weight:800;
-  margin-top:20px;
-  display:block;
-}
-
+.panel-title { color: #5d2ed1; font-size: 28px; margin: 0 0 24px; }
+article { line-height: 1.9; font-size: 16px; }
+article h2 { color: #5d2ed1; }
+article h3 { font-size: 24px; line-height: 1.5; }
+article p { margin-bottom: 18px; white-space: pre-line; overflow-wrap: anywhere; }
+article strong { font-weight: 900; color: #171428; }
 .cta {
-  display:inline-block;
-  margin-top:20px;
-  padding:10px 16px;
-  background:#6d3be8;
-  color:#fff;
-  border-radius:8px;
-  text-decoration:none;
+  display: inline-block;
+  margin-top: 26px;
+  padding: 13px 20px;
+  border-radius: 14px;
+  background: #6d3be8;
+  color: white !important;
+  text-decoration: none;
+  font-weight: 900;
+  box-shadow: 0 12px 24px rgba(109, 59, 232, .22);
+}
+.archive-title { margin: 34px 0 14px; font-size: 22px; font-weight: 900; }
+.archive { display: flex; flex-direction: column; gap: 10px; }
+.archive button {
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: 1px solid #eadfff;
+  border-radius: 18px;
+  padding: 18px 20px;
+  cursor: pointer;
+  font-weight: 800;
+  display: flex;
+  justify-content: space-between;
+}
+.loading, .empty {
+  background: white;
+  border: 1px solid #eadfff;
+  border-radius: 24px;
+  padding: 40px;
+  text-align: center;
+  color: #6f6682;
+  font-weight: 700;
+}
+@media(max-width: 700px) {
+  h1 { font-size: 32px; }
+  .tabs { grid-template-columns: 1fr; }
+  .panel { padding: 24px; }
 }
 </style>
 </head>
 
 <body>
 <div class="wrap">
+  <section class="hero">
+    <div class="badge">Daily Labor Law Learning</div>
+    <h1 id="mainTitle">오늘의 노무 학습</h1>
+  </section>
 
-<h1 id="title">로딩중...</h1>
+  <div id="loading" class="loading">데이터를 불러오고 있습니다...</div>
 
-<div class="tabs">
-  <button class="tab active" onclick="selectTab('issue')" id="tab-issue">이슈</button>
-  <button class="tab" onclick="selectTab('case')" id="tab-case">판례</button>
-  <button class="tab" onclick="selectTab('study')" id="tab-study">노동법</button>
-</div>
+  <main id="app" style="display:none;">
+    <div class="tabs">
+      <button class="tab active" id="tab-issue" onclick="selectTab('issue')">이슈 공부하기</button>
+      <button class="tab" id="tab-case" onclick="selectTab('case')">판례 공부하기</button>
+      <button class="tab" id="tab-study" onclick="selectTab('study')">노동법 공부하기</button>
+    </div>
 
-<div class="card" id="content">불러오는 중...</div>
+    <section class="panel">
+      <h2 class="panel-title" id="sectionTitle">오늘의 노무 이슈</h2>
+      <div id="content"></div>
+    </section>
 
+    <h3 class="archive-title">지난 학습 목록</h3>
+    <div class="archive" id="archive"></div>
+  </main>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
 
-let data = [];
+let letters = [];
+let currentDay = null;
 let currentTab = "issue";
 
-function formatDate(d){
-  if(!d) return "";
-  const s = d.substring(0,10).split("-");
-  return Number(s[0])+"년 "+Number(s[1])+"월 "+Number(s[2])+"일 오늘의 학습";
+function formatDate(v) {
+  if (!v) return "날짜 없음";
+  const str = String(v).substring(0, 10);
+  const parts = str.split("-");
+  if (parts.length === 3) {
+    return Number(parts[0]) + "년 " + Number(parts[1]) + "월 " + Number(parts[2]) + "일";
+  }
+  return str;
 }
 
-function clean(html){
-  const div = document.createElement("div");
-  div.innerHTML = html;
+function label(tab) {
+  if (tab === "issue") return "오늘의 노무 이슈";
+  if (tab === "case") return "오늘의 판례";
+  return "오늘의 노동법 공부";
+}
 
-  // 🔥 제목 제거 (핵심)
-  div.querySelectorAll("h1,h2,h3,p").forEach(el=>{
-    const t = (el.textContent||"").trim();
-    if(
-      t==="오늘의 노무 이슈"||
-      t==="오늘의 판례"||
-      t==="오늘의 노동법 공부"
-    ){
-      el.remove();
+function decodeHtml(text) {
+  const box = document.createElement("textarea");
+  box.innerHTML = text || "";
+  return box.value;
+}
+
+function removeLongUrls(text) {
+  const words = String(text || "").split(/\s+/);
+  return words.filter(function(word) {
+    return word.indexOf("http://") !== 0 && word.indexOf("https://") !== 0;
+  }).join(" ");
+}
+
+function cleanBodyHtml(html) {
+  const decoded = decodeHtml(html || "");
+  const temp = document.createElement("div");
+  temp.innerHTML = decoded;
+
+  temp.querySelectorAll("a").forEach(function(a) {
+    const text = document.createTextNode(a.textContent || "");
+    a.parentNode.replaceChild(text, a);
+  });
+
+  temp.querySelectorAll("font").forEach(function(f) {
+    const text = document.createTextNode(f.textContent || "");
+    f.parentNode.replaceChild(text, f);
+  });
+
+  temp.querySelectorAll("p").forEach(function(p) {
+    let text = p.textContent || "";
+    const trimmed = text.trim();
+
+    if (trimmed === "원문 보기" || trimmed === "원문보기" || trimmed.indexOf("원문:") === 0) {
+      p.remove();
+      return;
     }
-  });
 
-  // 링크 제거
-  div.querySelectorAll("a").forEach(a=>{
-    a.replaceWith(a.textContent);
-  });
+    text = removeLongUrls(text).trim();
 
-  // 원문 제거
-  div.querySelectorAll("p").forEach(p=>{
-    const t = (p.textContent||"").trim();
-    if(t.includes("원문")) p.remove();
-  });
+    const match = text.match(/^(\d+\.\s[^\n]+)\n?([\s\S]*)$/);
 
-  // 🔥 번호 구조 처리
-  div.querySelectorAll("p").forEach(p=>{
-    let t = p.textContent.trim();
-
-    const match = t.match(/^(\d+\.\s[^\.]+)(.*)$/);
-
-    if(match){
-      const title = match[1];
+    if (match) {
+      const heading = match[1].trim();
       const body = match[2].trim();
 
-      p.innerHTML =
-        "<span class='section-title'>"+title+"</span><br>"+body;
+      p.innerHTML = body
+        ? "<strong>" + heading + "</strong><br><br>" + body
+        : "<strong>" + heading + "</strong>";
+    } else {
+      p.textContent = text;
     }
   });
 
-  return div.innerHTML;
+  return temp.innerHTML;
 }
 
-async function init(){
-  const res = await fetch(API+"?t="+Date.now());
-  const json = await res.json();
+function normalizeResponse(json) {
+  if (json && Array.isArray(json.letters)) return json.letters;
+  return [];
+}
 
-  data = json.letters || [];
+function getSourceUrl(item) {
+  if (!item) return "";
+  if (item.source_url) return item.source_url;
 
-  if(!data.length){
-    document.getElementById("content").innerText="데이터 없음";
-    return;
+  const decoded = decodeHtml(item.body_html || "");
+  const temp = document.createElement("div");
+  temp.innerHTML = decoded;
+  const a = temp.querySelector("a");
+  return a ? a.href : "";
+}
+
+async function init() {
+  const loading = document.getElementById("loading");
+
+  try {
+    const res = await fetch(API_URL + "?t=" + Date.now());
+    const json = await res.json();
+
+    letters = normalizeResponse(json);
+
+    if (!letters.length) {
+      loading.innerHTML = "발행된 데이터가 없습니다.";
+      return;
+    }
+
+    currentDay = letters[0];
+
+    document.getElementById("mainTitle").textContent =
+      formatDate(currentDay.publish_date) + " 오늘의 학습";
+
+    render();
+    renderArchive();
+
+    loading.style.display = "none";
+    document.getElementById("app").style.display = "block";
+  } catch (e) {
+    loading.innerHTML = "데이터를 불러올 수 없습니다.<br>" + e.message;
+    console.error(e);
   }
-
-  document.getElementById("title").innerText =
-    formatDate(data[0].publish_date);
-
-  render();
 }
 
-function selectTab(tab){
+function selectTab(tab) {
   currentTab = tab;
 
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.getElementById("tab-"+tab).classList.add("active");
+  document.querySelectorAll(".tab").forEach(function(t) {
+    t.classList.remove("active");
+  });
 
+  document.getElementById("tab-" + tab).classList.add("active");
   render();
 }
 
-function render(){
-  const item = data[0][currentTab];
+function render() {
+  document.getElementById("sectionTitle").textContent = label(currentTab);
 
-  if(!item){
-    document.getElementById("content").innerText="내용 없음";
+  const item = currentDay && currentDay[currentTab];
+
+  if (!item) {
+    document.getElementById("content").innerHTML =
+      '<div class="empty">아직 발행된 내용이 없습니다.</div>';
     return;
   }
 
-  const body = clean(item.body_html);
+  const url = getSourceUrl(item);
+  const body = cleanBodyHtml(item.body_html);
 
-  const url = item.source_url || "";
+  const cta = url
+    ? '<p><a class="cta" href="' + url + '" target="_blank" rel="noopener noreferrer">원문보기 →</a></p>'
+    : "";
 
   document.getElementById("content").innerHTML =
-    body + (url ? `<a class="cta" href="${url}" target="_blank">원문보기 →</a>` : "");
+    "<article>" + body + cta + "</article>";
+}
+
+function renderArchive() {
+  const box = document.getElementById("archive");
+  box.innerHTML = "";
+
+  letters.forEach(function(day) {
+    const btn = document.createElement("button");
+
+    btn.innerHTML =
+      "<span>" + formatDate(day.publish_date) + "</span><span>보기 →</span>";
+
+    btn.onclick = function() {
+      currentDay = day;
+      currentTab = "issue";
+
+      document.getElementById("mainTitle").textContent =
+        formatDate(day.publish_date) + " 오늘의 학습";
+
+      document.querySelectorAll(".tab").forEach(function(t) {
+        t.classList.remove("active");
+      });
+
+      document.getElementById("tab-issue").classList.add("active");
+
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    box.appendChild(btn);
+  });
 }
 
 init();
