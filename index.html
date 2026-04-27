@@ -301,8 +301,59 @@ function render() {
     return;
   }
 
+  function cleanHtml(html) {
+  if (!html) return "";
+
+  // 1. a 태그 제거 (텍스트만 남김)
+  let cleaned = html.replace(/<a[^>]*>(.*?)<\/a>/gi, "$1");
+
+  // 2. font 태그 제거
+  cleaned = cleaned.replace(/<font[^>]*>/gi, "").replace(/<\/font>/gi, "");
+
+  // 3. 긴 URL 제거
+  cleaned = cleaned.replace(/https?:\/\/[^\s<]+/g, "");
+
+  return cleaned;
+}
+
+function render() {
+  document.getElementById("sectionTitle").textContent = label(currentTab);
+
+  const item = currentDay && currentDay[currentTab];
+
+  if (!item) {
+    document.getElementById("content").innerHTML =
+      `<div class="empty">아직 발행된 내용이 없습니다.</div>`;
+    return;
+  }
+
+  const cleanedHtml = cleanHtml(item.body_html);
+
+  // CTA 버튼 (원문보기)
+  const cta = item.source_url
+    ? `<div style="margin-top:28px;">
+         <a href="${item.source_url}" target="_blank"
+            style="
+              display:inline-block;
+              padding:14px 22px;
+              border-radius:12px;
+              background:#6d3be8;
+              color:white;
+              font-weight:800;
+              text-decoration:none;
+              box-shadow:0 8px 18px rgba(109,59,232,.25);
+            ">
+            원문보기 →
+         </a>
+       </div>`
+    : "";
+
   document.getElementById("content").innerHTML =
-    item.body_html || `<article><h3>${item.title || ""}</h3><p>내용이 없습니다.</p></article>`;
+    `<article>
+      <h3>${item.title || ""}</h3>
+      ${cleanedHtml}
+      ${cta}
+    </article>`;
 }
 
 function renderArchive() {
