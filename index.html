@@ -4,15 +4,23 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>오늘의 학습</title>
+
 <style>
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
   font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   background: linear-gradient(180deg, #f7f3ff 0%, #fbfaff 45%, #ffffff 100%);
   color: #171428;
 }
-.wrap { max-width: 980px; margin: 0 auto; padding: 36px 18px 70px; }
+
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 36px 18px 70px;
+}
+
 .hero {
   background: white;
   border: 1px solid #eadfff;
@@ -22,6 +30,7 @@ body {
   margin-bottom: 26px;
   text-align: center;
 }
+
 .badge {
   display: inline-block;
   padding: 8px 16px;
@@ -32,8 +41,21 @@ body {
   font-size: 14px;
   margin-bottom: 18px;
 }
-h1 { margin: 0; font-size: 42px; line-height: 1.2; letter-spacing: -1.2px; }
-.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
+
+h1 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.2;
+  letter-spacing: -1.2px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 24px 0;
+}
+
 .tab {
   border: 1px solid #e1d6f8;
   background: white;
@@ -45,12 +67,19 @@ h1 { margin: 0; font-size: 42px; line-height: 1.2; letter-spacing: -1.2px; }
   transition: .2s;
   color: #28213a;
 }
+
+.tab:hover {
+  transform: translateY(-2px);
+  border-color: #8b5cf6;
+}
+
 .tab.active {
   background: #6d3be8;
   color: white;
   border-color: #6d3be8;
   box-shadow: 0 14px 28px rgba(109, 59, 232, .2);
 }
+
 .panel {
   background: white;
   border: 1px solid #eadfff;
@@ -58,12 +87,45 @@ h1 { margin: 0; font-size: 42px; line-height: 1.2; letter-spacing: -1.2px; }
   padding: 34px;
   box-shadow: 0 18px 45px rgba(70, 45, 120, .07);
 }
-.panel-title { color: #5d2ed1; font-size: 28px; margin: 0 0 24px; }
-article { line-height: 1.9; font-size: 16px; }
-article h2 { color: #5d2ed1; }
-article h3 { font-size: 24px; line-height: 1.5; }
-article p { margin-bottom: 18px; white-space: pre-line; overflow-wrap: anywhere; }
-article strong { font-weight: 900; color: #171428; }
+
+.panel-title {
+  color: #5d2ed1;
+  font-size: 28px;
+  margin: 0 0 28px;
+}
+
+.content-card {
+  border: 1px solid #e4e0ec;
+  border-radius: 18px;
+  padding: 30px;
+  background: white;
+}
+
+.content-card h3 {
+  font-size: 24px;
+  line-height: 1.5;
+  margin: 0 0 26px;
+  color: #171428;
+}
+
+.content-card p {
+  font-size: 17px;
+  line-height: 1.95;
+  margin: 0 0 24px;
+  color: #171428;
+  font-weight: 400;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.section-heading {
+  display: block;
+  font-size: 18px;
+  font-weight: 900;
+  color: #171428;
+  margin: 28px 0 10px;
+}
+
 .cta {
   display: inline-block;
   margin-top: 26px;
@@ -75,8 +137,19 @@ article strong { font-weight: 900; color: #171428; }
   font-weight: 900;
   box-shadow: 0 12px 24px rgba(109, 59, 232, .22);
 }
-.archive-title { margin: 34px 0 14px; font-size: 22px; font-weight: 900; }
-.archive { display: flex; flex-direction: column; gap: 10px; }
+
+.archive-title {
+  margin: 34px 0 14px;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.archive {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .archive button {
   width: 100%;
   text-align: left;
@@ -88,8 +161,15 @@ article strong { font-weight: 900; color: #171428; }
   font-weight: 800;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
-.loading, .empty {
+
+.archive button:hover {
+  background: #f5efff;
+}
+
+.loading,
+.empty {
   background: white;
   border: 1px solid #eadfff;
   border-radius: 24px;
@@ -98,10 +178,12 @@ article strong { font-weight: 900; color: #171428; }
   color: #6f6682;
   font-weight: 700;
 }
+
 @media(max-width: 700px) {
   h1 { font-size: 32px; }
   .tabs { grid-template-columns: 1fr; }
   .panel { padding: 24px; }
+  .content-card { padding: 22px; }
 }
 </style>
 </head>
@@ -139,6 +221,28 @@ let letters = [];
 let currentDay = null;
 let currentTab = "issue";
 
+const HEADINGS = [
+  "1. 전체 요약",
+  "2. 사건 개요",
+  "2. 사실관계",
+  "2. 왜 중요한가",
+  "3. 자세히 살펴볼 부분",
+  "3. 자세히 살펴볼 문제",
+  "3. 핵심 쟁점",
+  "3. 언제 사용되는가",
+  "4. HR/노무 관점에서의 의미",
+  "4. 법원의 판단을 실무적으로 읽는 법",
+  "4. 사례로 이해하기",
+  "5. 실무 체크포인트",
+  "5. HR 실무 시사점",
+  "5. HR 담당자가 특히 봐야 할 부분",
+  "6. 결론",
+  "6. 실무 체크리스트",
+  "7. 결론",
+  "7. 자주 헷갈리는 포인트",
+  "8. 한 줄 정리"
+];
+
 function formatDate(v) {
   if (!v) return "날짜 없음";
   const str = String(v).substring(0, 10);
@@ -161,59 +265,23 @@ function decodeHtml(text) {
   return box.value;
 }
 
-function removeLongUrls(text) {
-  const words = String(text || "").split(/\s+/);
-  return words.filter(function(word) {
-    return word.indexOf("http://") !== 0 && word.indexOf("https://") !== 0;
-  }).join(" ");
-}
-
-function cleanBodyHtml(html) {
-  const decoded = decodeHtml(html || "");
-  const temp = document.createElement("div");
-  temp.innerHTML = decoded;
-
-  temp.querySelectorAll("a").forEach(function(a) {
-    const text = document.createTextNode(a.textContent || "");
-    a.parentNode.replaceChild(text, a);
-  });
-
-  temp.querySelectorAll("font").forEach(function(f) {
-    const text = document.createTextNode(f.textContent || "");
-    f.parentNode.replaceChild(text, f);
-  });
-
-  temp.querySelectorAll("p").forEach(function(p) {
-    let text = p.textContent || "";
-    const trimmed = text.trim();
-
-    if (trimmed === "원문 보기" || trimmed === "원문보기" || trimmed.indexOf("원문:") === 0) {
-      p.remove();
-      return;
-    }
-
-    text = removeLongUrls(text).trim();
-
-    const match = text.match(/^(\d+\.\s[^\n]+)\n?([\s\S]*)$/);
-
-    if (match) {
-      const heading = match[1].trim();
-      const body = match[2].trim();
-
-      p.innerHTML = body
-        ? "<strong>" + heading + "</strong><br><br>" + body
-        : "<strong>" + heading + "</strong>";
-    } else {
-      p.textContent = text;
-    }
-  });
-
-  return temp.innerHTML;
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 function normalizeResponse(json) {
   if (json && Array.isArray(json.letters)) return json.letters;
   return [];
+}
+
+function removeLongUrls(text) {
+  return String(text || "")
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function getSourceUrl(item) {
@@ -225,6 +293,103 @@ function getSourceUrl(item) {
   temp.innerHTML = decoded;
   const a = temp.querySelector("a");
   return a ? a.href : "";
+}
+
+function extractTextFromHtml(html) {
+  const decoded = decodeHtml(html || "");
+  const temp = document.createElement("div");
+  temp.innerHTML = decoded;
+
+  temp.querySelectorAll("a").forEach(function(a) {
+    a.replaceWith(a.textContent || "");
+  });
+
+  temp.querySelectorAll("font").forEach(function(f) {
+    f.replaceWith(f.textContent || "");
+  });
+
+  temp.querySelectorAll("h1, h2, h3").forEach(function(el) {
+    const t = (el.textContent || "").trim();
+    if (
+      t === "오늘의 노무 이슈" ||
+      t === "오늘의 판례" ||
+      t === "오늘의 노동법 공부"
+    ) {
+      el.remove();
+    }
+  });
+
+  const pieces = [];
+
+  temp.querySelectorAll("p, h3").forEach(function(el) {
+    let text = (el.textContent || "").trim();
+
+    if (!text) return;
+    if (text === "원문 보기" || text === "원문보기" || text.indexOf("원문:") === 0) return;
+    if (text === "오늘의 노무 이슈" || text === "오늘의 판례" || text === "오늘의 노동법 공부") return;
+
+    text = removeLongUrls(text);
+    if (text) pieces.push(text);
+  });
+
+  return pieces.join("\n\n");
+}
+
+function splitContent(text) {
+  const found = [];
+
+  HEADINGS.forEach(function(h) {
+    const idx = text.indexOf(h);
+    if (idx >= 0) found.push({ heading: h, index: idx });
+  });
+
+  found.sort(function(a, b) {
+    return a.index - b.index;
+  });
+
+  if (!found.length) {
+    return [{ heading: "", body: text.trim() }];
+  }
+
+  const blocks = [];
+
+  if (found[0].index > 0) {
+    const before = text.substring(0, found[0].index).trim();
+    if (before) blocks.push({ heading: "", body: before });
+  }
+
+  for (let i = 0; i < found.length; i++) {
+    const start = found[i].index + found[i].heading.length;
+    const end = i + 1 < found.length ? found[i + 1].index : text.length;
+    const body = text.substring(start, end).trim();
+
+    blocks.push({
+      heading: found[i].heading,
+      body: body
+    });
+  }
+
+  return blocks;
+}
+
+function renderBody(item) {
+  const text = extractTextFromHtml(item.body_html || "");
+  const blocks = splitContent(text);
+  let html = "";
+
+  blocks.forEach(function(block) {
+    if (!block.heading && !block.body) return;
+
+    if (block.heading) {
+      html += "<p><span class='section-heading'>" + escapeHtml(block.heading) + "</span>";
+      if (block.body) html += escapeHtml(block.body);
+      html += "</p>";
+    } else {
+      html += "<p>" + escapeHtml(block.body) + "</p>";
+    }
+  });
+
+  return html;
 }
 
 async function init() {
@@ -280,21 +445,28 @@ function render() {
   }
 
   const url = getSourceUrl(item);
-  const body = cleanBodyHtml(item.body_html);
+  const body = renderBody(item);
 
   const cta = url
-    ? '<p><a class="cta" href="' + url + '" target="_blank" rel="noopener noreferrer">원문보기 →</a></p>'
+    ? '<a class="cta" href="' + url + '" target="_blank" rel="noopener noreferrer">원문보기 →</a>'
     : "";
 
   document.getElementById("content").innerHTML =
-    "<article>" + body + cta + "</article>";
+    '<div class="content-card"><h3>' + escapeHtml(item.title || "") + '</h3>' + body + cta + '</div>';
 }
 
 function renderArchive() {
   const box = document.getElementById("archive");
   box.innerHTML = "";
 
-  letters.forEach(function(day) {
+  const pastLetters = letters.slice(1);
+
+  if (pastLetters.length === 0) {
+    box.innerHTML = '<div class="empty">아직 지난 학습 목록이 없습니다.</div>';
+    return;
+  }
+
+  pastLetters.forEach(function(day) {
     const btn = document.createElement("button");
 
     btn.innerHTML =
