@@ -137,7 +137,29 @@ h1 {
   font-weight: 900;
   box-shadow: 0 12px 24px rgba(109, 59, 232, .22);
 }
+.keyword-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
 
+.keyword-chip {
+  display: inline-block;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: #f0e7ff;
+  color: #5d2ed1;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.keyword-chip:hover {
+  background: #6d3be8;
+  color: white;
+}
+  
 .archive-title {
   margin: 34px 0 14px;
   font-size: 22px;
@@ -381,12 +403,27 @@ function renderBody(item) {
     if (!block.heading && !block.body) return;
 
     if (block.heading) {
-      html += "<p><span class='section-heading'>" + escapeHtml(block.heading) + "</span>";
-      if (block.body) html += escapeHtml(block.body);
-      html += "</p>";
-    } else {
-      html += "<p>" + escapeHtml(block.body) + "</p>";
-    }
+  html += "<p><span class='section-heading'>" + escapeHtml(block.heading) + "</span>";
+
+  if (block.heading === "■ 키워드 추출" && block.body) {
+    const keywords = block.body.split(",").map(function(k) {
+      return k.trim();
+    }).filter(Boolean);
+
+    html += "<span class='keyword-wrap'>";
+
+    keywords.forEach(function(k) {
+      const link = "https://www.google.com/search?q=" + encodeURIComponent(k);
+      html += "<a class='keyword-chip' href='" + link + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(k) + "</a>";
+    });
+
+    html += "</span>";
+  } else if (block.body) {
+    html += escapeHtml(block.body);
+  }
+
+  html += "</p>";
+}
   });
 
   return html;
