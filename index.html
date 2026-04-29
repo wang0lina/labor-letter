@@ -321,7 +321,8 @@ function getSourceUrl(item) {
   return a ? a.href : "";
 }
 
-function extractTextFromHtml(html) {
+// ✅ 수정: titleToExclude 파라미터 추가
+function extractTextFromHtml(html, titleToExclude) {
   const decoded = decodeHtml(html || "");
   const temp = document.createElement("div");
   temp.innerHTML = decoded;
@@ -346,6 +347,7 @@ function extractTextFromHtml(html) {
   });
 
   const pieces = [];
+  const normalizedTitle = (titleToExclude || "").trim();
 
   temp.querySelectorAll("p, h3").forEach(function(el) {
     let text = (el.textContent || "").trim();
@@ -353,6 +355,9 @@ function extractTextFromHtml(html) {
     if (!text) return;
     if (text === "원문 보기" || text === "원문보기" || text.indexOf("원문:") === 0) return;
     if (text === "오늘의 노무 이슈" || text === "오늘의 판례" || text === "오늘의 노동법 공부") return;
+
+    // ✅ 수정: 제목과 동일한 텍스트면 본문에서 제외
+    if (normalizedTitle && text === normalizedTitle) return;
 
     text = removeLongUrls(text);
     if (text) pieces.push(text);
@@ -398,8 +403,9 @@ function splitContent(text) {
   return blocks;
 }
 
+// ✅ 수정: item.title을 extractTextFromHtml에 전달
 function renderBody(item) {
-  const text = extractTextFromHtml(item.body_html || "");
+  const text = extractTextFromHtml(item.body_html || "", item.title || "");
   const blocks = splitContent(text);
   let html = "";
 
