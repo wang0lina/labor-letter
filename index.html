@@ -245,6 +245,8 @@ let currentDay = null;
 let currentTab = "issue";
 
 const HEADINGS = [
+  "■ 기사 요약",
+  "■ 키워드",
   "■ 전체 요약",
   "■ 결론",
   "■ 키워드 추출",
@@ -415,7 +417,7 @@ function renderBody(item) {
     if (block.heading) {
       html += "<p><strong class='section-heading'>" + escapeHtml(block.heading) + "</strong></p>";
 
-      if (block.heading === "■ 키워드 추출" && block.body) {
+      if ((block.heading === "■ 키워드 추출" || block.heading === "■ 키워드") && block.body) {
         const keywords = block.body.split(",").map(function(k) {
           return k.trim();
         }).filter(Boolean);
@@ -507,7 +509,7 @@ function render() {
   document.getElementById("content").innerHTML =
     '<div class="content-card">'
     + '<h3>' + escapeHtml(displayTitle) + '</h3>'
-    + (displaySource ? '<p style="color:#6f6682; font-size:18px; margin: -18px 0 24px 0;">' + escapeHtml(displaySource) + '</p>' : '')
+    + (displaySource ? '<p style="color:#6f6682; font-size:14px; margin: -18px 0 24px 0;">' + escapeHtml(displaySource) + '</p>' : '')
     + body + cta + '</div>';
 }
 
