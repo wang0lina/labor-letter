@@ -486,8 +486,17 @@ function render() {
   const item = currentDay && currentDay[currentTab];
 
   if (!item) {
-    document.getElementById("content").innerHTML =
-      '<div class="empty">아직 발행된 내용이 없습니다.</div>';
+   // "제목 - 신문사명" 을 제목과 출처로 분리
+  const rawTitle = item.title || "";
+  const dashMatch = rawTitle.match(/^([\s\S]+?)\s*-\s*([^-]+)$/);
+  const displayTitle = dashMatch ? dashMatch[1].trim() : rawTitle;
+  const displaySource = dashMatch ? "— " + dashMatch[2].trim() : "";
+
+  document.getElementById("content").innerHTML =
+    '<div class="content-card">'
+    + '<h3>' + escapeHtml(displayTitle) + '</h3>'
+    + (displaySource ? '<p style="color:#6f6682; font-size:14px; margin: -18px 0 24px 0;">' + escapeHtml(displaySource) + '</p>' : '')
+    + body + cta + '</div>';
     return;
   }
 
