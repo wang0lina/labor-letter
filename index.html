@@ -245,8 +245,6 @@ let currentDay = null;
 let currentTab = "issue";
 
 const HEADINGS = [
-  "▶ 더 알아보기",
-  "▶ 출처",
   "■ 전체 요약",
   "■ 결론",
   "■ 키워드 추출",
@@ -415,14 +413,13 @@ function renderBody(item) {
     if (!block.heading && !block.body) return;
 
     if (block.heading) {
-      // ▶ 더 알아보기: 키워드 칩으로 렌더링 (각각 분리)
-      if (block.heading === "▶ 더 알아보기" && block.body) {
-        html += "<p><strong class='section-heading'>" + escapeHtml(block.heading) + "</strong></p>";
-        // \n 기준으로 분리 후 · 제거, 빈 값 필터
-        const keywords = block.body
-          .split(/\n|·/)
-          .map(function(k) { return k.replace(/^[\s·\-\*]+/, "").trim(); })
-          .filter(function(k) { return k.length > 0; });
+      html += "<p><strong class='section-heading'>" + escapeHtml(block.heading) + "</strong></p>";
+
+      if (block.heading === "■ 키워드 추출" && block.body) {
+        const keywords = block.body.split(",").map(function(k) {
+          return k.trim();
+        }).filter(Boolean);
+
         html += "<p><span class='keyword-wrap'>";
         keywords.forEach(function(k) {
           const link = "https://www.google.com/search?q=" + encodeURIComponent(k);
@@ -430,41 +427,8 @@ function renderBody(item) {
         });
         html += "</span></p>";
 
-      // ▶ 출처: 링크로 렌더링
-      } else if (block.heading === "▶ 출처" && block.body) {
-        html += "<p><strong class='section-heading'>" + escapeHtml(block.heading) + "</strong></p>";
-        const lines = block.body.split("\n").filter(Boolean);
-        html += "<p>";
-        lines.forEach(function(line) {
-          const cleaned = line.replace(/^·\s*/, "").trim();
-          // URL 추출
-          const urlMatch = cleaned.match(/https?:\/\/\S+/);
-          if (urlMatch) {
-            const label = cleaned.replace(urlMatch[0], "").replace(/—\s*$/, "").trim() || "원문 보기";
-            html += "<a class='cta' href='" + urlMatch[0] + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(label) + " →</a>";
-          } else {
-            html += escapeHtml(cleaned);
-          }
-        });
-        html += "</p>";
-
-      // ■ 키워드 추출: 기존 칩 방식
-      } else if (block.heading === "■ 키워드 추출" && block.body) {
-        html += "<p><strong class='section-heading'>" + escapeHtml(block.heading) + "</strong></p>";
-        const keywords = block.body.split(",").map(function(k) { return k.trim(); }).filter(Boolean);
-        html += "<p><span class='keyword-wrap'>";
-        keywords.forEach(function(k) {
-          const link = "https://www.google.com/search?q=" + encodeURIComponent(k);
-          html += "<a class='keyword-chip' href='" + link + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(k) + "</a>";
-        });
-        html += "</span></p>";
-
-      // 나머지 소제목: bold + 본문 분리
-      } else {
-        html += "<p><strong class='section-heading'>" + escapeHtml(block.heading) + "</strong></p>";
-        if (block.body) {
-          html += "<p>" + escapeHtml(block.body) + "</p>";
-        }
+      } else if (block.body) {
+        html += "<p>" + escapeHtml(block.body) + "</p>";
       }
 
     } else {
