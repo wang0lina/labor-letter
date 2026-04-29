@@ -415,13 +415,14 @@ function renderBody(item) {
     if (!block.heading && !block.body) return;
 
     if (block.heading) {
-      // ▶ 더 알아보기: 키워드 칩으로 렌더링
+      // ▶ 더 알아보기: 키워드 칩으로 렌더링 (각각 분리)
       if (block.heading === "▶ 더 알아보기" && block.body) {
         html += "<p><strong class='section-heading'>" + escapeHtml(block.heading) + "</strong></p>";
+        // \n 기준으로 분리 후 · 제거, 빈 값 필터
         const keywords = block.body
-          .split("\n")
-          .map(function(k) { return k.replace(/^·\s*/, "").trim(); })
-          .filter(Boolean);
+          .split(/\n|·/)
+          .map(function(k) { return k.replace(/^[\s·\-\*]+/, "").trim(); })
+          .filter(function(k) { return k.length > 0; });
         html += "<p><span class='keyword-wrap'>";
         keywords.forEach(function(k) {
           const link = "https://www.google.com/search?q=" + encodeURIComponent(k);
