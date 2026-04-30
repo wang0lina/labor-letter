@@ -6,454 +6,128 @@
 <title>Daily HR Report</title>
 
 <style>
-* { box-sizing: border-box; }
-
 body {
+  font-family: sans-serif;
+  background: #faf7ff;
   margin: 0;
-  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  background: linear-gradient(180deg, #f7f3ff 0%, #fbfaff 45%, #ffffff 100%);
-  color: #171428;
 }
 
 .wrap {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 36px 18px 70px;
+  max-width: 900px;
+  margin: auto;
+  padding: 30px;
 }
 
 .hero {
-  background: white;
-  border: 1px solid #eadfff;
-  border-radius: 28px;
-  padding: 38px 34px;
-  box-shadow: 0 20px 50px rgba(102, 51, 204, .08);
-  margin-bottom: 26px;
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .badge {
+  background: #eee0ff;
+  padding: 6px 14px;
+  border-radius: 20px;
   display: inline-block;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: #ede4ff;
-  color: #6b35d9;
-  font-weight: 800;
-  font-size: 14px;
-  margin-bottom: 18px;
-}
-
-h1 {
-  margin: 0;
-  font-size: 42px;
-  line-height: 1.2;
-  letter-spacing: -1.2px;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .tabs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin: 24px 0;
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
 }
 
 .tab {
-  border: 1px solid #e1d6f8;
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
   background: white;
-  border-radius: 20px;
-  padding: 20px 12px;
-  font-size: 18px;
-  font-weight: 800;
   cursor: pointer;
-  transition: .2s;
-  color: #28213a;
-}
-
-.tab:hover {
-  transform: translateY(-2px);
-  border-color: #8b5cf6;
 }
 
 .tab.active {
   background: #6d3be8;
   color: white;
-  border-color: #6d3be8;
-  box-shadow: 0 14px 28px rgba(109, 59, 232, .2);
-}
-
-.panel {
-  background: white;
-  border: 1px solid #eadfff;
-  border-radius: 28px;
-  padding: 34px;
-  box-shadow: 0 18px 45px rgba(70, 45, 120, .07);
-}
-
-.panel-title {
-  color: #5d2ed1;
-  font-size: 28px;
-  margin: 0 0 28px;
-}
-
-.content-card {
-  border: 1px solid #e4e0ec;
-  border-radius: 18px;
-  padding: 30px;
-  background: white;
-}
-
-.content-card h3 {
-  font-size: 24px;
-  line-height: 1.5;
-  margin: 0 0 26px;
-  color: #171428;
-}
-
-.content-card p {
-  font-size: 17px;
-  line-height: 1.95;
-  margin: 0 0 24px;
-  color: #171428;
-  font-weight: 400;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-}
-
-.issue-list {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
 }
 
 .issue-card {
-  border: 1px solid #e4e0ec;
-  border-radius: 18px;
-  padding: 24px;
-  background: #fff;
-  box-shadow: 0 10px 26px rgba(70, 45, 120, .05);
-}
-
-.issue-index {
-  display: inline-block;
-  margin-bottom: 12px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: #ede4ff;
-  color: #6b35d9;
-  font-weight: 900;
-  font-size: 13px;
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 15px;
 }
 
 .issue-title {
-  margin: 0 0 12px;
-  font-size: 21px;
-  line-height: 1.5;
-  color: #171428;
-}
-
-.issue-meta {
-  margin: 0 0 18px;
-  color: #6f6682;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.section-heading {
-  display: block;
+  font-weight: bold;
   font-size: 18px;
-  font-weight: 900;
-  color: #171428;
-  margin: 28px 0 14px;
-}
-
-.cta {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 13px 20px;
-  border-radius: 14px;
-  background: #6d3be8;
-  color: white !important;
-  text-decoration: none;
-  font-weight: 900;
-  box-shadow: 0 12px 24px rgba(109, 59, 232, .22);
-}
-
-.keyword-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 8px;
+  margin-bottom: 10px;
 }
 
 .keyword-chip {
   display: inline-block;
-  padding: 9px 14px;
-  border-radius: 999px;
-  background: #f0e7ff;
-  color: #5d2ed1;
+  padding: 6px 10px;
+  margin: 4px;
+  border-radius: 20px;
+  background: #eee0ff;
   text-decoration: none;
-  font-weight: 800;
-  font-size: 14px;
+  color: #5d2ed1;
+  font-size: 13px;
 }
 
-.keyword-chip:hover {
+.cta {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 16px;
   background: #6d3be8;
   color: white;
-}
-
-.archive-title {
-  margin: 34px 0 14px;
-  font-size: 22px;
-  font-weight: 900;
-}
-
-.archive {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.archive button {
-  width: 100%;
-  text-align: left;
-  background: white;
-  border: 1px solid #eadfff;
-  border-radius: 18px;
-  padding: 18px 20px;
-  cursor: pointer;
-  font-weight: 800;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.archive button:hover {
-  background: #f5efff;
-}
-
-.loading,
-.empty {
-  background: white;
-  border: 1px solid #eadfff;
-  border-radius: 24px;
-  padding: 40px;
-  text-align: center;
-  color: #6f6682;
-  font-weight: 700;
-}
-
-@media(max-width: 700px) {
-  h1 { font-size: 32px; }
-  .tabs { grid-template-columns: 1fr; }
-  .panel { padding: 24px; }
-  .content-card { padding: 22px; }
+  border-radius: 10px;
+  text-decoration: none;
 }
 </style>
 </head>
 
 <body>
+
 <div class="wrap">
-  <section class="hero">
+  <div class="hero">
     <div class="badge">Daily Labor Law Learning</div>
-    <h1 id="mainTitle">오늘의 노무 학습</h1>
-  </section>
+    <h1 id="title">오늘의 노무 학습</h1>
+  </div>
 
-  <div id="loading" class="loading">데이터를 불러오고 있습니다...</div>
+  <div id="loading">데이터 불러오는 중...</div>
 
-  <main id="app" style="display:none;">
+  <div id="app" style="display:none;">
+
     <div class="tabs">
-      <button class="tab active" id="tab-issue" onclick="selectTab('issue')">이슈 공부하기</button>
-      <button class="tab" id="tab-case" onclick="selectTab('case')">판례 공부하기</button>
-      <button class="tab" id="tab-study" onclick="selectTab('study')">노동법 공부하기</button>
+      <button class="tab active" onclick="selectTab('issue')">이슈</button>
+      <button class="tab" onclick="selectTab('case')">판례</button>
+      <button class="tab" onclick="selectTab('study')">노동법</button>
     </div>
 
-    <section class="panel">
-      <h2 class="panel-title" id="sectionTitle">오늘의 노무 이슈</h2>
-      <div id="content"></div>
-    </section>
+    <div id="content"></div>
 
-    <h3 class="archive-title">지난 학습 목록</h3>
-    <div class="archive" id="archive"></div>
-  </main>
+  </div>
 </div>
 
 <script>
+
 const API_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
 
-let letters = [];
-let currentDay = null;
+let data = [];
 let currentTab = "issue";
 
-const HEADINGS = [
-  "■ 기사 요약",
-  "■ 키워드",
-  "■ 전체 요약",
-  "■ 결론",
-  "■ 키워드 추출",
-  "1. 전체 요약",
-  "2. 사건 개요",
-  "2. 사실관계",
-  "2. 왜 중요한가",
-  "3. 자세히 살펴볼 부분",
-  "3. 자세히 살펴볼 문제",
-  "3. 핵심 쟁점",
-  "3. 언제 사용되는가",
-  "4. HR/노무 관점에서의 의미",
-  "4. 법원의 판단을 실무적으로 읽는 법",
-  "4. 사례로 이해하기",
-  "5. 실무 체크포인트",
-  "5. HR 실무 시사점",
-  "5. HR 담당자가 특히 봐야 할 부분",
-  "6. 결론",
-  "6. 실무 체크리스트",
-  "7. 결론",
-  "7. 자주 헷갈리는 포인트",
-  "8. 한 줄 정리"
-];
+/* ---------------- 핵심: 이슈 파싱 ---------------- */
 
-function formatDate(v) {
-  if (!v) return "날짜 없음";
-  const str = String(v).substring(0, 10);
-  const parts = str.split("-");
-  if (parts.length === 3) {
-    return Number(parts[0]) + "년 " + Number(parts[1]) + "월 " + Number(parts[2]) + "일";
-  }
-  return str;
-}
-
-function label(tab) {
-  if (tab === "issue") return "오늘의 노무 이슈";
-  if (tab === "case") return "오늘의 판례";
-  return "오늘의 노동법 공부";
-}
-
-function decodeHtml(text) {
-  const box = document.createElement("textarea");
-  box.innerHTML = text || "";
-  return box.value;
-}
-
-function escapeHtml(text) {
-  return String(text || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-function normalizeResponse(json) {
-  if (json && Array.isArray(json.letters)) return json.letters;
-  return [];
-}
-
-function removeLongUrls(text) {
-  return String(text || "")
-    .replace(/https?:\/\/\S+/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getSourceUrl(item) {
-  if (!item) return "";
-  if (item.source_url) return item.source_url;
-
-  const decoded = decodeHtml(item.body_html || "");
-  const temp = document.createElement("div");
-  temp.innerHTML = decoded;
-  const a = temp.querySelector("a");
-  return a ? a.href : "";
-}
-
-function extractTextFromHtml(html, titleToExclude) {
-  const decoded = decodeHtml(html || "");
-  const temp = document.createElement("div");
-  temp.innerHTML = decoded;
-
-  temp.querySelectorAll("a").forEach(function(a) {
-    a.replaceWith(a.textContent || "");
-  });
-
-  temp.querySelectorAll("font").forEach(function(f) {
-    f.replaceWith(f.textContent || "");
-  });
-
-  temp.querySelectorAll("h1, h2, h3").forEach(function(el) {
-    const t = (el.textContent || "").trim();
-    if (
-      t === "오늘의 노무 이슈" ||
-      t === "오늘의 판례" ||
-      t === "오늘의 노동법 공부"
-    ) {
-      el.remove();
-    }
-  });
-
-  const pieces = [];
-  const normalizedTitle = (titleToExclude || "").trim();
-
-  temp.querySelectorAll("p, h3").forEach(function(el) {
-    let text = (el.textContent || "").trim();
-
-    if (!text) return;
-    if (text === "원문 보기" || text === "원문보기" || text.indexOf("원문:") === 0) return;
-    if (text === "오늘의 노무 이슈" || text === "오늘의 판례" || text === "오늘의 노동법 공부") return;
-    if (normalizedTitle && text === normalizedTitle) return;
-
-    text = removeLongUrls(text);
-    if (text) pieces.push(text);
-  });
-
-  return pieces.join("\n\n");
-}
-
-function splitContent(text) {
-  const found = [];
-
-  HEADINGS.forEach(function(h) {
-    const idx = text.indexOf(h);
-    if (idx >= 0) found.push({ heading: h, index: idx });
-  });
-
-  found.sort(function(a, b) {
-    return a.index - b.index;
-  });
-
-  if (!found.length) {
-    return [{ heading: "", body: text.trim() }];
-  }
-
-  const blocks = [];
-
-  if (found[0].index > 0) {
-    const before = text.substring(0, found[0].index).trim();
-    if (before) blocks.push({ heading: "", body: before });
-  }
-
-  for (let i = 0; i < found.length; i++) {
-    const start = found[i].index + found[i].heading.length;
-    const end = i + 1 < found.length ? found[i + 1].index : text.length;
-    const body = text.substring(start, end).trim();
-
-    blocks.push({
-      heading: found[i].heading,
-      body: body
-    });
-  }
-
-  return blocks;
-}
-
-function parseIssueItems(text) {
-  const chunks = String(text || "")
-    .split(/\n\s*\n/)
-    .map(s => s.trim())
-    .filter(Boolean);
-
+function parseIssues(text) {
   const items = [];
 
-  chunks.forEach(function(chunk) {
-    const lines = chunk.split("\n").map(line => line.trim()).filter(Boolean);
+  const blocks = text.split(/뉴스\s+\d+/).filter(x => x.trim());
 
-    let current = {
-      index: "",
+  blocks.forEach((block, i) => {
+    const item = {
+      index: i + 1,
       title: "",
       source: "",
       date: "",
@@ -461,217 +135,105 @@ function parseIssueItems(text) {
       url: ""
     };
 
-    lines.forEach(function(line) {
-      if (/^뉴스\s+\d+/.test(line)) {
-        current.index = line.replace("뉴스", "").trim();
-      } else if (line.indexOf("제목:") === 0) {
-        current.title = line.replace("제목:", "").trim();
-      } else if (line.indexOf("출처:") === 0) {
-        current.source = line.replace("출처:", "").trim();
-      } else if (line.indexOf("발행일:") === 0) {
-        current.date = line.replace("발행일:", "").trim();
-      } else if (line.indexOf("키워드:") === 0) {
-        current.keywords = line.replace("키워드:", "").split(",").map(k => k.trim()).filter(Boolean);
-      } else if (line.indexOf("URL:") === 0) {
-        current.url = line.replace("URL:", "").trim();
-      }
+    const lines = block.split("\n");
+
+    lines.forEach(line => {
+      line = line.trim();
+
+      if (line.startsWith("제목:"))
+        item.title = line.replace("제목:", "").trim();
+
+      if (line.startsWith("출처:"))
+        item.source = line.replace("출처:", "").trim();
+
+      if (line.startsWith("발행일:"))
+        item.date = line.replace("발행일:", "").trim();
+
+      if (line.startsWith("키워드:"))
+        item.keywords = line.replace("키워드:", "").split(",").map(x => x.trim());
+
+      if (line.startsWith("URL:"))
+        item.url = line.replace("URL:", "").trim();
     });
 
-    if (current.title || current.url || current.keywords.length) {
-      items.push(current);
-}
-
-function renderKeywordChips(keywords) {
-  let html = "<span class='keyword-wrap'>";
-
-  keywords.forEach(function(k) {
-    const link = "https://www.google.com/search?q=" + encodeURIComponent(k);
-    html += "<a class='keyword-chip' href='" + link + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(k) + "</a>";
+    if (item.title) items.push(item);
   });
 
-  html += "</span>";
-  return html;
+  return items;
 }
 
-function renderIssueCuration(item) {
-  const text = extractTextFromHtml(item.body_html || "", item.title || "");
-  const cleanText = text.replace("■ 오늘의 노무 이슈 3가지", "").trim();
-  const issues = parseIssueItems(cleanText);
+/* ---------------- 렌더 ---------------- */
 
-  if (!issues.length) {
-    return "<div class='content-card'><p>오늘의 이슈를 불러올 수 없습니다.</p></div>";
-  }
+function renderIssues(text) {
+  const issues = parseIssues(text);
 
-  let html = "<div class='issue-list'>";
+  if (!issues.length) return "데이터 없음";
 
-  issues.forEach(function(news) {
-    html += "<article class='issue-card'>";
-    html += "<span class='issue-index'>뉴스 " + escapeHtml(news.index || "") + "</span>";
-    html += "<h3 class='issue-title'>" + escapeHtml(news.title || "제목 없음") + "</h3>";
-    html += "<p class='issue-meta'>출처: " + escapeHtml(news.source || "미상") + " · 발행일: " + escapeHtml(news.date || "미상") + "</p>";
-
-    if (news.keywords && news.keywords.length) {
-      html += renderKeywordChips(news.keywords);
-    }
-
-    if (news.url) {
-      html += "<br><a class='cta' href='" + escapeHtml(news.url) + "' target='_blank' rel='noopener noreferrer'>원문보기 →</a>";
-    }
-
-    html += "</article>";
-  });
-
-  html += "</div>";
-  return html;
-}
-
-function renderBody(item) {
-  if (currentTab === "issue") {
-    return renderIssueCuration(item);
-  }
-
-  const text = extractTextFromHtml(item.body_html || "", item.title || "");
-  const blocks = splitContent(text);
   let html = "";
 
-  blocks.forEach(function(block) {
-    if (!block.heading && !block.body) return;
+  issues.forEach(item => {
+    html += `
+      <div class="issue-card">
+        <div class="issue-title">${item.title}</div>
+        <div>출처: ${item.source} · ${item.date}</div>
 
-    if (block.heading) {
-      html += "<p><strong class='section-heading'>" + escapeHtml(block.heading) + "</strong></p>";
+        <div>
+          ${item.keywords.map(k => `
+            <a class="keyword-chip" href="https://www.google.com/search?q=${encodeURIComponent(k)}" target="_blank">
+              ${k}
+            </a>
+          `).join("")}
+        </div>
 
-      if ((block.heading === "■ 키워드 추출" || block.heading === "■ 키워드") && block.body) {
-        const keywords = block.body.split(",").map(function(k) {
-          return k.trim();
-        }).filter(Boolean);
-
-        html += "<p>" + renderKeywordChips(keywords) + "</p>";
-      } else if (block.body) {
-        html += "<p>" + escapeHtml(block.body) + "</p>";
-      }
-    } else {
-      html += "<p>" + escapeHtml(block.body) + "</p>";
-    }
+        <a class="cta" href="${item.url}" target="_blank">원문보기 →</a>
+      </div>
+    `;
   });
 
   return html;
 }
 
+/* ---------------- API ---------------- */
+
 async function init() {
-  const loading = document.getElementById("loading");
+  const res = await fetch(API_URL);
+  const json = await res.json();
 
-  try {
-    const res = await fetch(API_URL + "?t=" + Date.now());
-    const json = await res.json();
+  data = json.letters;
 
-    letters = normalizeResponse(json);
+  document.getElementById("title").innerText =
+    data[0].publish_date + " 오늘의 학습";
 
-    if (!letters.length) {
-      loading.innerHTML = "발행된 데이터가 없습니다.";
-      return;
-    }
+  render();
 
-    currentDay = letters[0];
-
-    document.getElementById("mainTitle").textContent =
-      formatDate(currentDay.publish_date) + " 오늘의 학습";
-
-    render();
-    renderArchive();
-
-    loading.style.display = "none";
-    document.getElementById("app").style.display = "block";
-  } catch (e) {
-    loading.innerHTML = "데이터를 불러올 수 없습니다.<br>" + e.message;
-    console.error(e);
-  }
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("app").style.display = "block";
 }
+
+/* ---------------- 탭 ---------------- */
 
 function selectTab(tab) {
   currentTab = tab;
 
-  document.querySelectorAll(".tab").forEach(function(t) {
-    t.classList.remove("active");
-  });
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  event.target.classList.add("active");
 
-  document.getElementById("tab-" + tab).classList.add("active");
   render();
 }
 
 function render() {
-  document.getElementById("sectionTitle").textContent = label(currentTab);
-
-  const item = currentDay && currentDay[currentTab];
-
-  if (!item) {
-    document.getElementById("content").innerHTML =
-      '<div class="empty">아직 발행된 내용이 없습니다.</div>';
-    return;
-  }
+  const today = data[0];
 
   if (currentTab === "issue") {
-    document.getElementById("content").innerHTML = renderBody(item);
-    return;
+    document.getElementById("content").innerHTML =
+      renderIssues(today.issue.body_html);
+  } else {
+    document.getElementById("content").innerHTML = "준비중";
   }
-
-  const url = getSourceUrl(item);
-  const body = renderBody(item);
-
-  const cta = url
-    ? '<a class="cta" href="' + url + '" target="_blank" rel="noopener noreferrer">원문보기 →</a>'
-    : "";
-
-  const rawTitle = item.title || "";
-  const dashMatch = rawTitle.match(/^([\s\S]+?)\s*-\s*([^-]+)$/);
-  const displayTitle = dashMatch ? dashMatch[1].trim() : rawTitle;
-  const displaySource = dashMatch ? "— " + dashMatch[2].trim() : "";
-
-  document.getElementById("content").innerHTML =
-    '<div class="content-card">'
-    + '<h3>' + escapeHtml(displayTitle) + '</h3>'
-    + (displaySource ? '<p style="color:#6f6682; font-size:14px; margin: -18px 0 24px 0;">' + escapeHtml(displaySource) + '</p>' : '')
-    + body + cta + '</div>';
-}
-
-function renderArchive() {
-  const box = document.getElementById("archive");
-  box.innerHTML = "";
-
-  const pastLetters = letters.slice(1);
-
-  if (pastLetters.length === 0) {
-    box.innerHTML = '<div class="empty">아직 지난 학습 목록이 없습니다.</div>';
-    return;
-  }
-
-  pastLetters.forEach(function(day) {
-    const btn = document.createElement("button");
-
-    btn.innerHTML =
-      "<span>" + formatDate(day.publish_date) + "</span><span>보기 →</span>";
-
-    btn.onclick = function() {
-      currentDay = day;
-      currentTab = "issue";
-
-      document.getElementById("mainTitle").textContent =
-        formatDate(day.publish_date) + " 오늘의 학습";
-
-      document.querySelectorAll(".tab").forEach(function(t) {
-        t.classList.remove("active");
-      });
-
-      document.getElementById("tab-issue").classList.add("active");
-
-      render();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
-    box.appendChild(btn);
-  });
 }
 
 init();
+
 </script>
 </body>
 </html>
