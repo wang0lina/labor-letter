@@ -118,17 +118,56 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.issue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.issue-card {
+  border: 1px solid #e4e0ec;
+  border-radius: 18px;
+  padding: 24px;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(70, 45, 120, .05);
+}
+
+.issue-index {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #ede4ff;
+  color: #6b35d9;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.issue-title {
+  margin: 0 0 12px;
+  font-size: 21px;
+  line-height: 1.5;
+  color: #171428;
+}
+
+.issue-meta {
+  margin: 0 0 18px;
+  color: #6f6682;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 .section-heading {
   display: block;
   font-size: 18px;
   font-weight: 900;
   color: #171428;
-  margin: 28px 0 14px;  /* 소제목 아래 여백 늘림 */
+  margin: 28px 0 14px;
 }
 
 .cta {
   display: inline-block;
-  margin-top: 26px;
+  margin-top: 20px;
   padding: 13px 20px;
   border-radius: 14px;
   background: #6d3be8;
@@ -323,7 +362,6 @@ function getSourceUrl(item) {
   return a ? a.href : "";
 }
 
-// ✅ 수정: titleToExclude 파라미터 추가
 function extractTextFromHtml(html, titleToExclude) {
   const decoded = decodeHtml(html || "");
   const temp = document.createElement("div");
@@ -357,8 +395,6 @@ function extractTextFromHtml(html, titleToExclude) {
     if (!text) return;
     if (text === "원문 보기" || text === "원문보기" || text.indexOf("원문:") === 0) return;
     if (text === "오늘의 노무 이슈" || text === "오늘의 판례" || text === "오늘의 노동법 공부") return;
-
-    // ✅ 수정: 제목과 동일한 텍스트면 본문에서 제외
     if (normalizedTitle && text === normalizedTitle) return;
 
     text = removeLongUrls(text);
@@ -405,8 +441,95 @@ function splitContent(text) {
   return blocks;
 }
 
-// ✅ 수정: item.title을 extractTextFromHtml에 전달
+function parseIssueItems(text) {
+  const chunks = String(text || "")
+    .split(/\n\s*\n/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const items = [];
+  let current = null;
+
+  chunks.forEach(function(chunk) {
+    if (/^뉴스\s+\d+/.test(chunk)) {
+      if (current) items.push(current);
+      current = { index: chunk.replace("뉴스", "").trim(), title: "", source: "", date: "", keywords: [], url: "" };
+      return;
+    }
+
+    if (!current) return;
+
+    chunk.split("\n").forEach(function(line) {
+      const trimmed = line.trim();
+
+      if (trimmed.indexOf("제목:") === 0) {
+        current.title = trimmed.replace("제목:", "").trim();
+      } else if (trimmed.indexOf("출처:") === 0) {
+        current.source = trimmed.replace("출처:", "").trim();
+      } else if (trimmed.indexOf("발행일:") === 0) {
+        current.date = trimmed.replace("발행일:", "").trim();
+      } else if (trimmed.indexOf("키워드:") === 0) {
+        current.keywords = trimmed.replace("키워드:", "").split(",").map(k => k.trim()).filter(Boolean);
+      } else if (trimmed.indexOf("URL:") === 0) {
+        current.url = trimmed.replace("URL:", "").trim();
+      }
+    });
+  });
+
+  if (current) items.push(current);
+
+  return items;
+}
+
+function renderKeywordChips(keywords) {
+  let html = "<span class='keyword-wrap'>";
+
+  keywords.forEach(function(k) {
+    const link = "https://www.google.com/search?q=" + encodeURIComponent(k);
+    html += "<a class='keyword-chip' href='" + link + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(k) + "</a>";
+  });
+
+  html += "</span>";
+  return html;
+}
+
+function renderIssueCuration(item) {
+  const text = extractTextFromHtml(item.body_html || "", item.title || "");
+  const cleanText = text.replace("■ 오늘의 노무 이슈 3가지", "").trim();
+  const issues = parseIssueItems(cleanText);
+
+  if (!issues.length) {
+    return "<div class='content-card'><p>오늘의 이슈를 불러올 수 없습니다.</p></div>";
+  }
+
+  let html = "<div class='issue-list'>";
+
+  issues.forEach(function(news) {
+    html += "<article class='issue-card'>";
+    html += "<span class='issue-index'>뉴스 " + escapeHtml(news.index || "") + "</span>";
+    html += "<h3 class='issue-title'>" + escapeHtml(news.title || "제목 없음") + "</h3>";
+    html += "<p class='issue-meta'>출처: " + escapeHtml(news.source || "미상") + " · 발행일: " + escapeHtml(news.date || "미상") + "</p>";
+
+    if (news.keywords && news.keywords.length) {
+      html += renderKeywordChips(news.keywords);
+    }
+
+    if (news.url) {
+      html += "<br><a class='cta' href='" + escapeHtml(news.url) + "' target='_blank' rel='noopener noreferrer'>원문보기 →</a>";
+    }
+
+    html += "</article>";
+  });
+
+  html += "</div>";
+  return html;
+}
+
 function renderBody(item) {
+  if (currentTab === "issue") {
+    return renderIssueCuration(item);
+  }
+
   const text = extractTextFromHtml(item.body_html || "", item.title || "");
   const blocks = splitContent(text);
   let html = "";
@@ -422,17 +545,10 @@ function renderBody(item) {
           return k.trim();
         }).filter(Boolean);
 
-        html += "<p><span class='keyword-wrap'>";
-        keywords.forEach(function(k) {
-          const link = "https://www.google.com/search?q=" + encodeURIComponent(k);
-          html += "<a class='keyword-chip' href='" + link + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(k) + "</a>";
-        });
-        html += "</span></p>";
-
+        html += "<p>" + renderKeywordChips(keywords) + "</p>";
       } else if (block.body) {
         html += "<p>" + escapeHtml(block.body) + "</p>";
       }
-
     } else {
       html += "<p>" + escapeHtml(block.body) + "</p>";
     }
@@ -493,6 +609,11 @@ function render() {
     return;
   }
 
+  if (currentTab === "issue") {
+    document.getElementById("content").innerHTML = renderBody(item);
+    return;
+  }
+
   const url = getSourceUrl(item);
   const body = renderBody(item);
 
@@ -500,7 +621,6 @@ function render() {
     ? '<a class="cta" href="' + url + '" target="_blank" rel="noopener noreferrer">원문보기 →</a>'
     : "";
 
-  // 제목에서 "- 신문사명" 분리
   const rawTitle = item.title || "";
   const dashMatch = rawTitle.match(/^([\s\S]+?)\s*-\s*([^-]+)$/);
   const displayTitle = dashMatch ? dashMatch[1].trim() : rawTitle;
