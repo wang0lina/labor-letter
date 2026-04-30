@@ -448,37 +448,37 @@ function parseIssueItems(text) {
     .filter(Boolean);
 
   const items = [];
-  let current = null;
 
   chunks.forEach(function(chunk) {
-    if (/^뉴스\s+\d+/.test(chunk)) {
-      if (current) items.push(current);
-      current = { index: chunk.replace("뉴스", "").trim(), title: "", source: "", date: "", keywords: [], url: "" };
-      return;
-    }
+    const lines = chunk.split("\n").map(line => line.trim()).filter(Boolean);
 
-    if (!current) return;
+    let current = {
+      index: "",
+      title: "",
+      source: "",
+      date: "",
+      keywords: [],
+      url: ""
+    };
 
-    chunk.split("\n").forEach(function(line) {
-      const trimmed = line.trim();
-
-      if (trimmed.indexOf("제목:") === 0) {
-        current.title = trimmed.replace("제목:", "").trim();
-      } else if (trimmed.indexOf("출처:") === 0) {
-        current.source = trimmed.replace("출처:", "").trim();
-      } else if (trimmed.indexOf("발행일:") === 0) {
-        current.date = trimmed.replace("발행일:", "").trim();
-      } else if (trimmed.indexOf("키워드:") === 0) {
-        current.keywords = trimmed.replace("키워드:", "").split(",").map(k => k.trim()).filter(Boolean);
-      } else if (trimmed.indexOf("URL:") === 0) {
-        current.url = trimmed.replace("URL:", "").trim();
+    lines.forEach(function(line) {
+      if (/^뉴스\s+\d+/.test(line)) {
+        current.index = line.replace("뉴스", "").trim();
+      } else if (line.indexOf("제목:") === 0) {
+        current.title = line.replace("제목:", "").trim();
+      } else if (line.indexOf("출처:") === 0) {
+        current.source = line.replace("출처:", "").trim();
+      } else if (line.indexOf("발행일:") === 0) {
+        current.date = line.replace("발행일:", "").trim();
+      } else if (line.indexOf("키워드:") === 0) {
+        current.keywords = line.replace("키워드:", "").split(",").map(k => k.trim()).filter(Boolean);
+      } else if (line.indexOf("URL:") === 0) {
+        current.url = line.replace("URL:", "").trim();
       }
     });
-  });
 
-  if (current) items.push(current);
-
-  return items;
+    if (current.title || current.url || current.keywords.length) {
+      items.push(current);
 }
 
 function renderKeywordChips(keywords) {
