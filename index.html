@@ -1,369 +1,932 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦕</text></svg>">
-<title>Daily HR Report</title>
-
-<style>
-body {
-  font-family: sans-serif;
-  background: #faf7ff;
-  margin: 0;
+function getSheet(name) {
+  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
 }
 
-.wrap {
-  max-width: 900px;
-  margin: auto;
-  padding: 30px;
+function uuid() {
+  return Utilities.getUuid();
 }
 
-.hero {
-  text-align: center;
-  margin-bottom: 20px;
+function log(type, message) {
+  const sheet = getSheet('logs');
+  if (sheet) sheet.appendRow([new Date(), type, message]);
 }
 
-.badge {
-  background: #eee0ff;
-  padding: 6px 14px;
-  border-radius: 20px;
-  display: inline-block;
-  margin-bottom: 10px;
-  font-weight: bold;
+function today() {
+  return Utilities.formatDate(new Date(), "Asia/Seoul", "yyyy-MM-dd");
 }
 
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.tab {
-  flex: 1;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  background: white;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.tab.active {
-  background: #6d3be8;
-  color: white;
-}
-
-.issue-card,
-.basic-card {
-  background: white;
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 15px;
-}
-
-.issue-title {
-  font-weight: bold;
-  font-size: 18px;
-  margin-bottom: 10px;
-  line-height: 1.5;
-}
-
-.meta {
-  margin-bottom: 10px;
-  color: #333;
-}
-
-.keyword-chip {
-  display: inline-block;
-  padding: 6px 10px;
-  margin: 4px;
-  border-radius: 20px;
-  background: #eee0ff;
-  text-decoration: none;
-  color: #5d2ed1;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.cta {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 10px 16px;
-  background: #6d3be8;
-  color: white;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 800;
-}
-
-.archive-title {
-  margin: 34px 0 14px;
-  font-size: 22px;
-  font-weight: 900;
-}
-
-.archive {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.archive button {
-  width: 100%;
-  text-align: left;
-  background: white;
-  border: 1px solid #eadfff;
-  border-radius: 18px;
-  padding: 18px 20px;
-  cursor: pointer;
-  font-weight: 800;
-  display: flex;
-  justify-content: space-between;
-}
-
-.archive button:hover {
-  background: #f5efff;
-}
-
-#loading {
-  background: white;
-  border-radius: 14px;
-  padding: 24px;
-  text-align: center;
-}
-</style>
-</head>
-
-<body>
-<div class="wrap">
-  <div class="hero">
-    <div class="badge">Daily Labor Law Learning</div>
-    <h1 id="title">오늘의 노무 학습</h1>
-  </div>
-
-  <div id="loading">데이터 불러오는 중...</div>
-
-  <div id="app" style="display:none;">
-    <div class="tabs">
-      <button class="tab active" onclick="selectTab(event, 'issue')">이슈</button>
-      <button class="tab" onclick="selectTab(event, 'case')">판례</button>
-      <button class="tab" onclick="selectTab(event, 'study')">노동법</button>
-    </div>
-
-    <div id="content"></div>
-
-    <h3 class="archive-title">지난 학습 목록</h3>
-    <div id="archive" class="archive"></div>
-  </div>
-</div>
-
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
-
-let data = [];
-let currentDay = null;
-let currentTab = "issue";
-
-function formatDate(date) {
-  if (!date) return "";
-  if (date.includes("-")) {
-    const p = date.split("-");
-    return Number(p[0]) + "년 " + Number(p[1]) + "월 " + Number(p[2]) + "일";
-  }
-  return date;
-}
-
-function escapeHtml(text) {
+function stripHtml(text) {
   return String(text || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function decodeHtml(text) {
-  const box = document.createElement("textarea");
-  box.innerHTML = text || "";
-  return box.value;
+function cleanText(text) {
+  return String(text || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function stripHtml(html) {
-  const div = document.createElement("div");
-  div.innerHTML = decodeHtml(html || "");
-  return (div.textContent || div.innerText || "").trim();
+function normalizeDateValue(value) {
+  if (value instanceof Date) {
+    return Utilities.formatDate(value, "Asia/Seoul", "yyyy-MM-dd");
+  }
+  return String(value || "").substring(0, 10);
 }
 
-/* ---------------- 이슈 파싱 ---------------- */
+function getSetting(key) {
+  const sheet = getSheet('settings');
+  const values = sheet.getDataRange().getValues();
 
-function parseIssues(text) {
-  const items = [];
-  const clean = stripHtml(text).replace("■ 오늘의 노무 이슈 3가지", "").trim();
-  const blocks = clean.split(/뉴스\s+\d+/).filter(x => x.trim());
-
-  blocks.forEach((block, i) => {
-    const item = {
-      index: i + 1,
-      title: "",
-      source: "",
-      date: "",
-      keywords: [],
-      url: ""
-    };
-
-    block.split("\n").forEach(line => {
-      line = line.trim();
-
-      if (line.startsWith("제목:")) item.title = line.replace("제목:", "").trim();
-      if (line.startsWith("출처:")) item.source = line.replace("출처:", "").trim();
-      if (line.startsWith("발행일:")) item.date = line.replace("발행일:", "").trim();
-      if (line.startsWith("키워드:")) item.keywords = line.replace("키워드:", "").split(",").map(x => x.trim()).filter(Boolean);
-      if (line.startsWith("URL:")) item.url = line.replace("URL:", "").trim();
-    });
-
-    if (item.title) items.push(item);
-  });
-
-  return items;
-}
-
-function renderIssues(text) {
-  const issues = parseIssues(text);
-
-  if (!issues.length) return "<div class='basic-card'>오늘의 이슈를 불러올 수 없습니다.</div>";
-
-  let html = "";
-
-  issues.forEach(item => {
-    html += `
-      <div class="issue-card">
-        <div class="issue-title">${escapeHtml(item.title)}</div>
-        <div class="meta">출처: ${escapeHtml(item.source || "미상")} · ${escapeHtml(item.date || "미상")}</div>
-
-        <div>
-          ${item.keywords.map(k => `
-            <a class="keyword-chip" href="https://www.google.com/search?q=${encodeURIComponent(k)}" target="_blank">
-              ${escapeHtml(k)}
-            </a>
-          `).join("")}
-        </div>
-
-        ${item.url ? `<a class="cta" href="${escapeHtml(item.url)}" target="_blank">원문보기 →</a>` : ""}
-      </div>
-    `;
-  });
-
-  return html;
-}
-
-/* ---------------- 판례/노동법 임시 렌더 ---------------- */
-
-function renderBasic(item) {
-  if (!item) return "<div class='basic-card'>아직 내용이 없습니다.</div>";
-
-  const text = stripHtml(item.body_html || "");
-  const url = item.source_url || "";
-
-  return `
-    <div class="basic-card">
-      <div class="issue-title">${escapeHtml(item.title || "제목 없음")}</div>
-      <p>${escapeHtml(text)}</p>
-      ${url ? `<a class="cta" href="${escapeHtml(url)}" target="_blank">원문보기 →</a>` : ""}
-    </div>
-  `;
-}
-
-/* ---------------- API ---------------- */
-
-async function init() {
-  try {
-    const res = await fetch(API_URL + "?t=" + Date.now());
-    const json = await res.json();
-
-    data = json.letters || [];
-
-    if (!data.length) {
-      document.getElementById("loading").innerText = "발행된 데이터가 없습니다.";
-      return;
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][0]).trim() === key) {
+      return String(values[i][1]).trim();
     }
-
-    currentDay = data[0];
-
-    document.getElementById("title").innerText =
-      formatDate(currentDay.publish_date) + " 오늘의 학습";
-
-    render();
-    renderArchive();
-
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("app").style.display = "block";
-  } catch (e) {
-    document.getElementById("loading").innerText = "데이터를 불러올 수 없습니다.";
-    console.error(e);
   }
+  return "";
 }
 
-/* ---------------- 탭 ---------------- */
+/* =========================
+   1. Dictionary
+========================= */
 
-function selectTab(event, tab) {
-  currentTab = tab;
+function weeklyBuildDictionary() {
+  const sheet = getSheet('dictionary');
+  const existing = sheet.getDataRange().getValues().map(r => String(r[1] || "").trim());
 
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  event.target.classList.add("active");
+  const words = [
+    ["노조", "labor union", "HR", "노사관계"],
+    ["노동조합", "trade union", "HR", "노사관계"],
+    ["파업", "strike", "HR", "노사관계"],
+    ["단체교섭", "collective bargaining", "HR", "노사관계"],
+    ["쟁의행위", "industrial action", "HR", "노사관계"],
+    ["노랑봉투법", "yellow envelope law", "HR", "노사관계"],
+    ["부당해고", "unfair dismissal", "HR", "해고"],
+    ["징계해고", "disciplinary dismissal", "HR", "해고"],
+    ["정리해고", "layoff", "HR", "해고"],
+    ["근로자성", "employee status", "HR", "고용형태"],
+    ["통상임금", "ordinary wage", "HR", "임금"],
+    ["평균임금", "average wage", "HR", "임금"],
+    ["임금체불", "unpaid wages", "HR", "임금"],
+    ["포괄임금", "fixed overtime pay", "HR", "임금"],
+    ["퇴직금", "severance pay", "HR", "퇴직"],
+    ["최저임금", "minimum wage", "HR", "임금"],
+    ["휴업수당", "shutdown allowance", "HR", "임금"],
+    ["취업규칙", "rules of employment", "HR", "취업규칙"],
+    ["취업규칙 불이익변경", "disadvantageous change of employment rules", "HR", "취업규칙"],
+    ["직장 내 괴롭힘", "workplace harassment", "HR", "조직문화"],
+    ["산업재해", "industrial accident", "HR", "안전"],
+    ["중대재해", "serious accident", "HR", "안전"],
+    ["연장근로", "overtime work", "HR", "근로시간"],
+    ["야간근로", "night work", "HR", "근로시간"],
+    ["휴일근로", "holiday work", "HR", "근로시간"],
+    ["근로시간", "working hours", "HR", "근로시간"],
+    ["연차휴가", "annual leave", "HR", "휴가"],
+    ["기간제근로자", "fixed-term worker", "HR", "고용형태"],
+    ["파견근로", "dispatched work", "HR", "고용형태"],
+    ["도급", "contracting", "HR", "고용형태"],
+    ["원청", "principal contractor", "HR", "고용형태"],
+    ["하청", "subcontractor", "HR", "고용형태"]
+  ];
 
-  render();
+  words.forEach(w => {
+    if (!existing.includes(w[0])) {
+      sheet.appendRow([uuid(), w[0], w[1], w[2], w[3], "system", new Date(), new Date(), "active"]);
+    }
+  });
+
+  log("dictionary", "dictionary updated");
 }
 
-function render() {
-  if (!currentDay) return;
+function getActiveDictionaryTermsForCases() {
+  const sheet = getSheet('dictionary');
+  const values = sheet.getDataRange().getValues();
 
-  if (currentTab === "issue") {
-    document.getElementById("content").innerHTML =
-      renderIssues(currentDay.issue && currentDay.issue.body_html);
-  } else if (currentTab === "case") {
-    document.getElementById("content").innerHTML =
-      renderBasic(currentDay.case);
-  } else {
-    document.getElementById("content").innerHTML =
-      renderBasic(currentDay.study);
-  }
+  return values.slice(1)
+    .filter(r => String(r[8] || "").trim() === "active")
+    .filter(r => {
+      const category = String(r[4] || "");
+      return (
+        category.includes("노사") ||
+        category.includes("임금") ||
+        category.includes("해고") ||
+        category.includes("근로시간") ||
+        category.includes("조직문화") ||
+        category.includes("안전") ||
+        category.includes("고용형태") ||
+        category.includes("취업규칙") ||
+        category.includes("퇴직") ||
+        category.includes("휴가")
+      );
+    })
+    .map(r => String(r[1] || "").trim())
+    .filter(Boolean)
+    .slice(0, 25);
 }
 
-/* ---------------- 지난 목록 ---------------- */
+/* =========================
+   2. RSS Parsing
+========================= */
 
-function renderArchive() {
-  const box = document.getElementById("archive");
-  box.innerHTML = "";
+function extractTag(xml, tag) {
+  const reg = new RegExp("<" + tag + "[^>]*>([\\s\\S]*?)<\\/" + tag + ">", "i");
+  const match = xml.match(reg);
+  return match ? stripHtml(match[1]) : "";
+}
 
-  const pastLetters = data.slice(1);
+function extractItems(xml) {
+  const items = xml.match(/<item[\s\S]*?<\/item>/gi) || [];
+  return items.map(item => ({
+    title: extractTag(item, "title"),
+    link: extractTag(item, "link"),
+    pubDate: extractTag(item, "pubDate"),
+    description: extractTag(item, "description")
+  }));
+}
 
-  if (!pastLetters.length) {
-    box.innerHTML = "<div class='basic-card'>아직 지난 학습 목록이 없습니다.</div>";
+function extractSourceFromTitle(title) {
+  const t = cleanText(title);
+  const parts = t.split(" - ");
+  return parts.length > 1 ? parts[parts.length - 1].trim() : "";
+}
+
+function cleanTitle(title) {
+  return cleanText(title).replace(/\s*-\s*[^-]+$/g, "").trim();
+}
+
+function formatPubDate(pubDate) {
+  if (!pubDate) return "미상";
+  const d = new Date(pubDate);
+  if (isNaN(d.getTime())) return pubDate;
+  return Utilities.formatDate(d, "Asia/Seoul", "yyyy.MM.dd");
+}
+
+/* =========================
+   3. Crawl Issue Articles
+========================= */
+
+function crawlIssueArticles() {
+  const dict = getSheet('dictionary').getDataRange().getValues();
+
+  const keywords = dict.slice(1)
+    .filter(r => r[8] === "active")
+    .filter(r =>
+      String(r[4] || "").includes("노사") ||
+      String(r[4] || "").includes("임금") ||
+      String(r[4] || "").includes("해고") ||
+      String(r[4] || "").includes("근로시간") ||
+      String(r[4] || "").includes("조직문화") ||
+      String(r[4] || "").includes("안전")
+    )
+    .map(r => r[1])
+    .filter(Boolean);
+
+  const sheet = getSheet('raw_issue_articles');
+  const existingUrls = sheet.getLastRow() > 1
+    ? new Set(sheet.getRange(2, 5, sheet.getLastRow() - 1, 1).getValues().flat())
+    : new Set();
+
+  keywords.slice(0, 18).forEach(keyword => {
+    const url =
+      "https://news.google.com/rss/search?q=" +
+      encodeURIComponent(keyword + " 노무 OR 노동 OR HR when:30d") +
+      "&hl=ko&gl=KR&ceid=KR:ko";
+
+    try {
+      const xml = UrlFetchApp.fetch(url, { muteHttpExceptions: true }).getContentText("UTF-8");
+      const items = extractItems(xml);
+
+      items.slice(0, 4).forEach(item => {
+        if (!item.link || existingUrls.has(item.link)) return;
+
+        sheet.appendRow([
+          uuid(),
+          new Date(),
+          "Google News",
+          item.title,
+          item.link,
+          item.pubDate,
+          item.description || item.title,
+          keyword,
+          "N",
+          "collected"
+        ]);
+
+        existingUrls.add(item.link);
+      });
+
+      log("crawl", "issue crawled: " + keyword);
+    } catch (e) {
+      log("error", "crawlIssueArticles: " + keyword + " / " + e);
+    }
+  });
+}
+
+/* =========================
+   4. Crawl Cases from law.go.kr
+========================= */
+
+function crawlCaseArticles() {
+  const oc = getSetting("LAW_OC");
+
+  if (!oc) {
+    log("error", "LAW_OC 값이 settings 시트에 없습니다.");
     return;
   }
 
-  pastLetters.forEach(day => {
-    const btn = document.createElement("button");
-    btn.innerHTML = `<span>${formatDate(day.publish_date)}</span><span>보기 →</span>`;
+  const sheet = getSheet('raw_cases');
+  const existingIds = sheet.getLastRow() > 1
+    ? new Set(sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues().flat().map(String))
+    : new Set();
 
-    btn.onclick = function() {
-      currentDay = day;
-      currentTab = "issue";
+  const terms = getActiveDictionaryTermsForCases();
 
-      document.getElementById("title").innerText =
-        formatDate(day.publish_date) + " 오늘의 학습";
+  terms.forEach(function(term) {
+    const listUrl =
+      "http://www.law.go.kr/DRF/lawSearch.do" +
+      "?OC=" + encodeURIComponent(oc) +
+      "&target=prec" +
+      "&type=JSON" +
+      "&query=" + encodeURIComponent(term) +
+      "&display=8";
 
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      document.querySelector(".tab").classList.add("active");
+    try {
+      const response = UrlFetchApp.fetch(listUrl, { muteHttpExceptions: true });
+      const text = response.getContentText("UTF-8");
 
-      render();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    };
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        log("error", "판례 목록 JSON 파싱 실패: " + term + " / " + text.substring(0, 300));
+        return;
+      }
 
-    box.appendChild(btn);
+      const list = normalizePrecedentList(json);
+
+      if (!list.length) {
+        log("case_empty", "판례 목록 없음: " + term);
+        return;
+      }
+
+      list.forEach(function(item) {
+        const caseId = String(getCaseField(item, [
+          "판례일련번호", "판례정보일련번호", "ID", "id", "precSeq", "일련번호"
+        ]) || "").trim();
+
+        if (!caseId || existingIds.has(caseId)) return;
+
+        const detail = fetchPrecedentDetail(caseId, oc);
+        if (!detail) return;
+
+        const title = cleanText(getCaseField(detail, [
+          "사건명", "판례명", "title", "사건명칭"
+        ]) || getCaseField(item, ["사건명", "판례명"]) || term + " 판례");
+
+        const date = normalizeCaseDate(cleanText(getCaseField(detail, ["선고일자", "선고일"]) || getCaseField(item, ["선고일자"]) || ""));
+        if (!isRecentCaseDate(date, 5)) return;
+
+        const court = cleanText(getCaseField(detail, ["법원명", "선고법원"]) || getCaseField(item, ["법원명"]) || "");
+        const caseNo = cleanText(getCaseField(detail, ["사건번호"]) || getCaseField(item, ["사건번호"]) || "");
+
+        const point = cleanText(getCaseField(detail, ["판시사항"]) || "");
+        const summary = cleanText(getCaseField(detail, ["판결요지", "판례요지"]) || "");
+        const order = cleanText(getCaseField(detail, ["주문"]) || "");
+        const reason = cleanText(getCaseField(detail, ["이유", "판결이유"]) || "");
+        const laws = cleanText(getCaseField(detail, ["참조조문"]) || "");
+
+        const content = buildPrecedentRawContent({
+          court: court,
+          caseNo: caseNo,
+          point: point,
+          summary: summary,
+          order: order,
+          reason: reason,
+          laws: laws
+        });
+
+        const combined = title + " " + content + " " + term;
+        if (!isLaborPrecedent(combined)) return;
+
+        const link = "https://www.law.go.kr/precInfoP.do?precSeq=" + encodeURIComponent(caseId);
+
+        sheet.appendRow([
+          caseId,
+          new Date(),
+          "국가법령정보센터",
+          title,
+          link,
+          date,
+          content,
+          term,
+          "collected"
+        ]);
+
+        existingIds.add(caseId);
+      });
+
+      log("crawl", "case detail crawled from law.go.kr: " + term);
+    } catch (e) {
+      log("error", "crawlCaseArticles: " + term + " / " + e);
+    }
   });
 }
 
-init();
-</script>
-</body>
-</html>
+function normalizeCaseDate(dateText) {
+  const s = String(dateText || "").trim();
+  if (!s) return "";
+
+  if (/^\d{8}$/.test(s)) {
+    return s.substring(0, 4) + "." + s.substring(4, 6) + "." + s.substring(6, 8);
+  }
+
+  if (/^\d{4}\.\d{1,2}\.\d{1,2}$/.test(s)) {
+    const p = s.split(".");
+    return p[0] + "." + ("0" + p[1]).slice(-2) + "." + ("0" + p[2]).slice(-2);
+  }
+
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
+    const p = s.split("-");
+    return p[0] + "." + ("0" + p[1]).slice(-2) + "." + ("0" + p[2]).slice(-2);
+  }
+
+  return s;
+}
+
+function isRecentCaseDate(dateText, years) {
+  const s = normalizeCaseDate(dateText);
+  const year = parseInt(String(s).substring(0, 4), 10);
+  if (!year) return false;
+
+  const currentYear = new Date().getFullYear();
+  return currentYear - year <= years;
+}
+
+function fetchPrecedentDetail(caseId, oc) {
+  const detailUrl =
+    "http://www.law.go.kr/DRF/lawService.do" +
+    "?OC=" + encodeURIComponent(oc) +
+    "&target=prec" +
+    "&ID=" + encodeURIComponent(caseId) +
+    "&type=JSON";
+
+  try {
+    const response = UrlFetchApp.fetch(detailUrl, { muteHttpExceptions: true });
+    const text = response.getContentText("UTF-8");
+
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      log("error", "판례 상세 JSON 파싱 실패: " + caseId + " / " + text.substring(0, 300));
+      return null;
+    }
+
+    const detail = normalizePrecedentDetail(json);
+
+    if (!detail) {
+      log("case_detail_empty", "판례 상세 없음: " + caseId + " / " + text.substring(0, 300));
+      return null;
+    }
+
+    return detail;
+  } catch (e) {
+    log("error", "fetchPrecedentDetail: " + caseId + " / " + e);
+    return null;
+  }
+}
+
+function normalizePrecedentDetail(json) {
+  if (!json) return null;
+
+  if (json.PrecService) return json.PrecService;
+  if (json.precService) return json.precService;
+  if (json.판례상세정보) return json.판례상세정보;
+  if (json.판례) return json.판례;
+
+  return findObjectByPossibleKeys(json, ["판시사항", "판결요지", "사건명", "사건번호"]);
+}
+
+function findObjectByPossibleKeys(obj, keys) {
+  if (!obj || typeof obj !== "object") return null;
+
+  const hasKey = keys.some(k => obj[k] !== undefined);
+  if (hasKey) return obj;
+
+  for (const key in obj) {
+    const found = findObjectByPossibleKeys(obj[key], keys);
+    if (found) return found;
+  }
+
+  return null;
+}
+
+function buildPrecedentRawContent(data) {
+  const parts = [];
+
+  if (data.court || data.caseNo) {
+    parts.push("법원/사건번호: " + [data.court, data.caseNo].filter(Boolean).join(" / "));
+  }
+
+  if (data.point) {
+    parts.push("판시사항: " + data.point);
+  }
+
+  if (data.summary) {
+    parts.push("판결요지: " + data.summary);
+  }
+
+  if (data.order) {
+    parts.push("주문: " + data.order);
+  }
+
+  if (data.reason) {
+    const shortReason = data.reason.length > 800
+      ? data.reason.substring(0, 800) + "..."
+      : data.reason;
+    parts.push("판단이유: " + shortReason);
+  }
+
+  if (data.laws) {
+    parts.push("참조조문: " + data.laws);
+  }
+
+  return parts.join("\n");
+}
+
+function isLaborPrecedent(text) {
+  const t = String(text || "");
+
+  const include = [
+    "근로", "노동", "노조", "노동조합", "단체교섭", "쟁의행위",
+    "임금", "통상임금", "평균임금", "퇴직금", "해고", "부당해고",
+    "징계", "취업규칙", "산재", "직장 내 괴롭힘", "근로자",
+    "기간제", "파견", "사용자", "근로계약", "연장근로", "휴업수당"
+  ];
+
+  const exclude = [
+    "종부세", "상증세", "조세", "부가가치세", "법인세", "소득세",
+    "포괄위임금지원칙", "과잉금지원칙", "일반교통방해",
+    "폭력행위", "기부금품", "도로교통", "형법"
+  ];
+
+  return include.some(k => t.includes(k)) && !exclude.some(k => t.includes(k));
+}
+
+function getCaseField(item, keys) {
+  for (let i = 0; i < keys.length; i++) {
+    if (item && item[keys[i]] !== undefined && item[keys[i]] !== null) {
+      return item[keys[i]];
+    }
+  }
+  return "";
+}
+
+function normalizePrecedentList(json) {
+  if (!json) return [];
+
+  const candidates = [
+    json.PrecSearch && json.PrecSearch.prec,
+    json.LawSearch && json.LawSearch.prec,
+    json.lawSearch && json.lawSearch.prec,
+    json.prec,
+    json.판례
+  ];
+
+  for (let i = 0; i < candidates.length; i++) {
+    const c = candidates[i];
+    if (!c) continue;
+    return Array.isArray(c) ? c : [c];
+  }
+
+  const found = findArrayOrObjectByKey(json, ["prec", "판례"]);
+  if (found) return Array.isArray(found) ? found : [found];
+
+  return [];
+}
+
+function findArrayOrObjectByKey(obj, names) {
+  if (!obj || typeof obj !== "object") return null;
+
+  for (const key in obj) {
+    if (names.includes(key)) return obj[key];
+
+    const nested = findArrayOrObjectByKey(obj[key], names);
+    if (nested) return nested;
+  }
+
+  return null;
+}
+
+/* =========================
+   5. Crawl Law Study
+========================= */
+
+function crawlLawStudy() {
+  const sheet = getSheet('raw_law_study');
+  const existing = sheet.getLastRow() > 1
+    ? new Set(sheet.getRange(2, 4, sheet.getLastRow() - 1, 1).getValues().flat())
+    : new Set();
+
+  const terms = [
+    "평균임금", "통상임금", "부당해고", "근로자성", "포괄임금제",
+    "단체교섭", "쟁의행위", "취업규칙 불이익변경", "직장 내 괴롭힘",
+    "연차휴가", "퇴직금", "임금체불", "기간제근로자", "파견근로",
+    "휴업수당", "정리해고", "최저임금", "근로시간"
+  ];
+
+  terms.forEach(term => {
+    if (existing.has(term)) return;
+
+    sheet.appendRow([
+      uuid(),
+      new Date(),
+      "system_dictionary",
+      term,
+      "",
+      buildLawStudyRawContent(term),
+      term,
+      "collected"
+    ]);
+  });
+
+  log("crawl", "law study collected");
+}
+
+function buildLawStudyRawContent(term) {
+  const data = {
+    "평균임금": "평균임금은 퇴직금, 휴업수당, 재해보상 등의 기준이 되는 임금입니다. 산정 사유 발생일 이전 3개월 동안 지급된 임금 총액을 그 기간의 총일수로 나누어 계산합니다.",
+    "통상임금": "통상임금은 정기적·일률적·고정적으로 지급되는 임금으로, 연장근로수당, 야간근로수당, 휴일근로수당 산정의 기준이 됩니다.",
+    "부당해고": "부당해고는 정당한 이유 없이 근로자를 해고하거나 절차적 정당성을 갖추지 못한 해고를 말합니다.",
+    "근로자성": "근로자성은 계약서 명칭보다 실제 사용종속관계가 있는지를 기준으로 판단합니다.",
+    "포괄임금제": "포괄임금제는 일정한 연장·야간·휴일근로수당을 미리 포함해 임금을 정하는 방식입니다.",
+    "단체교섭": "단체교섭은 노동조합이 근로조건의 유지·개선을 위해 사용자와 교섭하는 절차입니다.",
+    "쟁의행위": "쟁의행위는 노동관계 당사자가 주장을 관철할 목적으로 업무의 정상 운영을 저해하는 행위입니다.",
+    "취업규칙 불이익변경": "취업규칙을 근로자에게 불리하게 변경하려면 근로자 과반수 또는 과반수 노동조합의 동의가 필요합니다.",
+    "직장 내 괴롭힘": "직장 내 괴롭힘은 지위 또는 관계의 우위를 이용해 업무상 적정범위를 넘어 근로자에게 신체적·정신적 고통을 주거나 근무환경을 악화시키는 행위입니다.",
+    "연차휴가": "연차휴가는 근로자의 휴식권을 보장하기 위한 제도입니다.",
+    "퇴직금": "퇴직금은 계속근로기간 1년 이상 근로자가 퇴직할 때 지급되는 금품입니다.",
+    "임금체불": "임금체불은 사용자가 근로자에게 지급해야 할 임금, 퇴직금, 수당 등을 정해진 시기에 지급하지 않는 것을 말합니다.",
+    "기간제근로자": "기간제근로자는 기간의 정함이 있는 근로계약을 체결한 근로자입니다.",
+    "파견근로": "파견근로는 파견사업주가 고용한 근로자를 사용사업주의 지휘·명령 아래 근무하게 하는 고용형태입니다.",
+    "휴업수당": "휴업수당은 사용자의 귀책사유로 근로자가 일을 하지 못하게 된 경우 지급해야 하는 수당입니다.",
+    "정리해고": "정리해고는 긴박한 경영상 필요에 따라 근로자를 해고하는 것을 말합니다.",
+    "최저임금": "최저임금은 국가가 정한 임금의 최저 수준으로, 사용자는 근로자에게 최저임금 이상을 지급해야 합니다.",
+    "근로시간": "근로시간은 근로자가 사용자의 지휘·감독 아래 근로를 제공하는 시간을 말합니다."
+  };
+
+  return data[term] || term + "은 노동법 실무에서 자주 다루어지는 개념입니다.";
+}
+
+/* =========================
+   6. Keyword Extraction
+========================= */
+
+function extractSimpleKeywords(text) {
+  const source = String(text || "");
+  const candidates = [
+    "삼성전자", "삼성전자 노조", "KBS", "노랑봉투법", "노동조합법",
+    "노조", "노동조합", "파업", "단체교섭", "쟁의행위",
+    "임금", "평균임금", "통상임금", "임금체불", "수당", "퇴직금", "성과급",
+    "해고", "부당해고", "징계", "정리해고",
+    "근로시간", "연장근로", "야간근로", "휴일근로", "포괄임금",
+    "취업규칙", "근로자성", "직장 내 괴롭힘", "산재", "중대재해",
+    "기간제", "파견근로", "원청", "하청", "노사관계", "노동법"
+  ];
+
+  const found = [];
+  candidates.forEach(function(k) {
+    if (source.includes(k) && !found.includes(k)) found.push(k);
+  });
+
+  const fallback = ["노동법", "HR", "노무관리"];
+  fallback.forEach(function(k) {
+    if (found.length < 3 && !found.includes(k)) found.push(k);
+  });
+
+  return found.slice(0, 5);
+}
+
+/* =========================
+   7. Summary Content
+========================= */
+
+function buildIssueCurationContent(rows) {
+  const blocks = rows.map((row, idx) => {
+    const title = cleanTitle(row[3]);
+    const source = extractSourceFromTitle(row[3]) || row[2] || "출처 미상";
+    const pubDate = formatPubDate(row[5]);
+    const keywords = extractSimpleKeywords(row[3] + " " + row[6] + " " + row[7]);
+
+    return [
+      "뉴스 " + (idx + 1),
+      "제목: " + title,
+      "출처: " + source,
+      "발행일: " + pubDate,
+      "키워드: " + keywords.join(", "),
+      "URL: " + row[4]
+    ].join("\n");
+  });
+
+  return "■ 오늘의 노무 이슈 3가지\n\n" + blocks.join("\n\n");
+}
+
+function makeCaseSummary(row) {
+  const title = cleanText(row[3]);
+  const date = cleanText(row[5]);
+  const raw = cleanText(row[6]);
+  const keyword = cleanText(row[7]);
+  const keywords = extractSimpleKeywords(title + " " + raw + " " + keyword);
+
+  return [
+    "■ 판례 정보\n" +
+    "사건명: " + title + "\n" +
+    "선고일자: " + (date || "미상") + "\n" +
+    "관련 키워드: " + keyword,
+
+    "■ 판례 핵심 내용\n" +
+    (raw || "이 판례는 원문을 통해 사실관계와 판단 이유를 함께 확인하는 것이 좋습니다."),
+
+    "■ 키워드\n" + keywords.join(", ")
+  ].join("\n\n");
+}
+
+function makeStudySummary(row) {
+  const term = cleanText(row[3]);
+  const raw = cleanText(stripHtml(row[5]));
+  const keywords = extractSimpleKeywords(term + " " + raw);
+
+  return [
+    "■ 전체 요약\n" +
+    "오늘 공부할 노동법 개념은 「" + term + "」입니다. " +
+    raw + " 이 개념은 HR 실무에서 임금, 근로시간, 해고, 징계, 계약관리, 노사관계 등과 연결될 수 있습니다.",
+
+    "■ 결론\n" +
+    term + "은 HR 담당자가 제도 운영의 적법성과 리스크를 판단할 때 반드시 이해해야 하는 핵심 개념입니다.",
+
+    "■ 키워드\n" + keywords.join(", ")
+  ].join("\n\n");
+}
+
+/* =========================
+   8. Processing
+========================= */
+
+function processTodayContents() {
+  const issueSheet = getSheet('raw_issue_articles');
+  const caseSheet = getSheet('raw_cases');
+  const studySheet = getSheet('raw_law_study');
+
+  const issueRows = issueSheet.getLastRow() > 1
+    ? issueSheet.getRange(2, 1, issueSheet.getLastRow() - 1, 10).getValues()
+    : [];
+
+  const caseRows = caseSheet.getLastRow() > 1
+    ? issueSheet.getRange(2, 1, 0, 10).getValues()
+    : [];
+
+  const realCaseRows = caseSheet.getLastRow() > 1
+    ? caseSheet.getRange(2, 1, caseSheet.getLastRow() - 1, 9).getValues()
+    : [];
+
+  const studyRows = studySheet.getLastRow() > 1
+    ? studySheet.getRange(2, 1, studySheet.getLastRow() - 1, 8).getValues()
+    : [];
+
+  const issues = pickRandomUnprocessedMany(issueRows, "issue", 3);
+  const caseItem = pickRandomUnprocessed(realCaseRows, "case");
+  const study = pickRandomUnprocessed(studyRows, "study");
+
+  if (issues.length) {
+    appendProcessed(
+      "issue",
+      "오늘의 노무 이슈 3가지",
+      issues[0][4],
+      issues.map(r => r[7]).join(", "),
+      buildIssueCurationContent(issues)
+    );
+  }
+
+  if (caseItem) {
+    appendProcessed("case", caseItem[3], caseItem[4], caseItem[7], makeCaseSummary(caseItem));
+  }
+
+  if (study) {
+    appendProcessed("study", study[3], study[4], study[6], makeStudySummary(study));
+  }
+
+  log("process", "processed: issue 3 / case 1 / study 1");
+}
+
+function pickRandomUnprocessed(rows, section) {
+  const selected = pickRandomUnprocessedMany(rows, section, 1);
+  return selected.length ? selected[0] : null;
+}
+
+function pickRandomUnprocessedMany(rows, section, count) {
+  const processed = getSheet('processed_contents').getDataRange().getValues();
+
+  const usedTitles = processed.slice(1)
+    .filter(r => r[2] === section)
+    .map(r => r[3]);
+
+  let candidates = rows.filter(r => !usedTitles.includes(r[3]));
+
+  if (candidates.length < count) {
+    candidates = rows.slice();
+  }
+
+  const picked = [];
+
+  while (candidates.length && picked.length < count) {
+    const index = Math.floor(Math.random() * candidates.length);
+    picked.push(candidates[index]);
+    candidates.splice(index, 1);
+  }
+
+  return picked;
+}
+
+function appendProcessed(section, title, sourceUrl, keywords, summary) {
+  getSheet('processed_contents').appendRow([
+    uuid(),
+    new Date(),
+    section,
+    title,
+    sourceUrl,
+    keywords,
+    summary,
+    "",
+    "",
+    "",
+    "",
+    "ready",
+    ""
+  ]);
+}
+
+/* =========================
+   9. Publish
+========================= */
+
+function publishToday() {
+  const processed = getSheet('processed_contents');
+  const publish = getSheet('published_daily');
+  const data = processed.getDataRange().getValues();
+  const date = today();
+
+  const already = publish.getLastRow() > 1
+    ? publish.getRange(2, 1, publish.getLastRow() - 1, 2).getValues()
+        .map(r => normalizeDateValue(r[0]) + "|" + r[1])
+    : [];
+
+  data.slice(1).forEach((row, i) => {
+    if (row[11] !== "ready") return;
+    if (already.includes(date + "|" + row[2])) return;
+
+    publish.appendRow([
+      date,
+      row[2],
+      row[0],
+      row[3],
+      buildHtml(row[2], row[3], row[6], row[4]),
+      row[4],
+      new Date()
+    ]);
+
+    processed.getRange(i + 2, 12).setValue("published");
+    processed.getRange(i + 2, 13).setValue(new Date());
+  });
+
+  log("publish", "published daily");
+}
+
+function buildHtml(section, title, content, url) {
+  const heading = section === "issue" ? "오늘의 노무 이슈" :
+                  section === "case" ? "오늘의 판례" :
+                  "오늘의 노동법 공부";
+
+  const paragraphs = String(content || "").split("\n\n").map(p => {
+    return "<p style='line-height:1.9; margin:0 0 18px 0; white-space:pre-line;'>" + p + "</p>";
+  }).join("");
+
+  const link = url ? "<p style='margin-top:24px;'><a href='" + url + "' target='_blank'>원문 보기</a></p>" : "";
+
+  return "<article style='padding:28px; border:1px solid #ddd; border-radius:14px; background:#fff;'>"
+    + "<h2 style='margin:0 0 20px 0; color:#5b3cc4;'>" + heading + "</h2>"
+    + "<h3 style='margin:0 0 22px 0; font-size:22px; line-height:1.5;'>" + title + "</h3>"
+    + paragraphs
+    + link
+    + "</article>";
+}
+
+/* =========================
+   10. Web API
+========================= */
+
+function getPublishedData() {
+  const sheet = getSheet('published_daily');
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  const rows = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
+
+  return rows.map(r => ({
+    publish_date: normalizeDateValue(r[0]),
+    section: r[1],
+    content_id: r[2],
+    title: r[3],
+    body_html: r[4],
+    source_url: r[5],
+    created_at: r[6]
+  }));
+}
+
+function groupPublishedByDate(data) {
+  const grouped = {};
+
+  data.forEach(item => {
+    const date = item.publish_date;
+
+    if (!grouped[date]) {
+      grouped[date] = {
+        publish_date: date,
+        issue: null,
+        case: null,
+        study: null
+      };
+    }
+
+    grouped[date][item.section] = item;
+  });
+
+  return Object.values(grouped).sort((a, b) => b.publish_date.localeCompare(a.publish_date));
+}
+
+function doGet(e) {
+  const data = getPublishedData();
+  const grouped = groupPublishedByDate(data);
+
+  return ContentService
+    .createTextOutput(JSON.stringify({
+      success: true,
+      count: grouped.length,
+      letters: grouped
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* =========================
+   11. Pipeline & Triggers
+========================= */
+
+function runDailyPipeline() {
+  runCrawlingOnly();
+  processTodayContents();
+  publishToday();
+}
+
+function runCrawlingOnly() {
+  crawlIssueArticles();
+  crawlCaseArticles();
+  crawlLawStudy();
+}
+
+function runDailyPublishOnly() {
+  processTodayContents();
+  publishToday();
+}
+
+function setupTriggers() {
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(t => ScriptApp.deleteTrigger(t));
+
+  ScriptApp.newTrigger('runCrawlingOnly')
+    .timeBased()
+    .everyHours(3)
+    .create();
+
+  ScriptApp.newTrigger('runDailyPublishOnly')
+    .timeBased()
+    .everyDays(1)
+    .atHour(7)
+    .create();
+
+  ScriptApp.newTrigger('weeklyBuildDictionary')
+    .timeBased()
+    .everyWeeks(1)
+    .onWeekDay(ScriptApp.WeekDay.MONDAY)
+    .atHour(7)
+    .create();
+
+  log("trigger", "트리거 설정 완료: 크롤링(3시간) / 발행(매일 7시)");
+}
