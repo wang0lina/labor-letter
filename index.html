@@ -46,6 +46,7 @@ body {
   border: 1px solid #ddd;
   background: white;
   cursor: pointer;
+  font-weight: 700;
 }
 
 .tab.active {
@@ -53,7 +54,8 @@ body {
   color: white;
 }
 
-.issue-card {
+.issue-card,
+.basic-card {
   background: white;
   border-radius: 14px;
   padding: 20px;
@@ -64,6 +66,12 @@ body {
   font-weight: bold;
   font-size: 18px;
   margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.meta {
+  margin-bottom: 10px;
+  color: #333;
 }
 
 .keyword-chip {
@@ -75,6 +83,7 @@ body {
   text-decoration: none;
   color: #5d2ed1;
   font-size: 13px;
+  font-weight: 700;
 }
 
 .cta {
@@ -85,12 +94,48 @@ body {
   color: white;
   border-radius: 10px;
   text-decoration: none;
+  font-weight: 800;
+}
+
+.archive-title {
+  margin: 34px 0 14px;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.archive {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.archive button {
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: 1px solid #eadfff;
+  border-radius: 18px;
+  padding: 18px 20px;
+  cursor: pointer;
+  font-weight: 800;
+  display: flex;
+  justify-content: space-between;
+}
+
+.archive button:hover {
+  background: #f5efff;
+}
+
+#loading {
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
 }
 </style>
 </head>
 
 <body>
-
 <div class="wrap">
   <div class="hero">
     <div class="badge">Daily Labor Law Learning</div>
@@ -100,31 +145,60 @@ body {
   <div id="loading">데이터 불러오는 중...</div>
 
   <div id="app" style="display:none;">
-
     <div class="tabs">
-      <button class="tab active" onclick="selectTab('issue')">이슈</button>
-      <button class="tab" onclick="selectTab('case')">판례</button>
-      <button class="tab" onclick="selectTab('study')">노동법</button>
+      <button class="tab active" onclick="selectTab(event, 'issue')">이슈</button>
+      <button class="tab" onclick="selectTab(event, 'case')">판례</button>
+      <button class="tab" onclick="selectTab(event, 'study')">노동법</button>
     </div>
 
     <div id="content"></div>
 
+    <h3 class="archive-title">지난 학습 목록</h3>
+    <div id="archive" class="archive"></div>
   </div>
 </div>
 
 <script>
-
 const API_URL = "https://script.google.com/macros/s/AKfycbzhcIQHjTp4E54VKKKCeJ5676RcyZ7O_SsRkzLqESQM8loWnTokUNFHTVN8Y6a-9AjkzQ/exec";
 
 let data = [];
+let currentDay = null;
 let currentTab = "issue";
 
-/* ---------------- 핵심: 이슈 파싱 ---------------- */
+function formatDate(date) {
+  if (!date) return "";
+  if (date.includes("-")) {
+    const p = date.split("-");
+    return Number(p[0]) + "년 " + Number(p[1]) + "월 " + Number(p[2]) + "일";
+  }
+  return date;
+}
+
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function decodeHtml(text) {
+  const box = document.createElement("textarea");
+  box.innerHTML = text || "";
+  return box.value;
+}
+
+function stripHtml(html) {
+  const div = document.createElement("div");
+  div.innerHTML = decodeHtml(html || "");
+  return (div.textContent || div.innerText || "").trim();
+}
+
+/* ---------------- 이슈 파싱 ---------------- */
 
 function parseIssues(text) {
   const items = [];
-
-  const blocks = text.split(/뉴스\s+\d+/).filter(x => x.trim());
+  const clean = stripHtml(text).replace("■ 오늘의 노무 이슈 3가지", "").trim();
+  const blocks = clean.split(/뉴스\s+\d+/).filter(x => x.trim());
 
   blocks.forEach((block, i) => {
     const item = {
@@ -136,25 +210,14 @@ function parseIssues(text) {
       url: ""
     };
 
-    const lines = block.split("\n");
-
-    lines.forEach(line => {
+    block.split("\n").forEach(line => {
       line = line.trim();
 
-      if (line.startsWith("제목:"))
-        item.title = line.replace("제목:", "").trim();
-
-      if (line.startsWith("출처:"))
-        item.source = line.replace("출처:", "").trim();
-
-      if (line.startsWith("발행일:"))
-        item.date = line.replace("발행일:", "").trim();
-
-      if (line.startsWith("키워드:"))
-        item.keywords = line.replace("키워드:", "").split(",").map(x => x.trim());
-
-      if (line.startsWith("URL:"))
-        item.url = line.replace("URL:", "").trim();
+      if (line.startsWith("제목:")) item.title = line.replace("제목:", "").trim();
+      if (line.startsWith("출처:")) item.source = line.replace("출처:", "").trim();
+      if (line.startsWith("발행일:")) item.date = line.replace("발행일:", "").trim();
+      if (line.startsWith("키워드:")) item.keywords = line.replace("키워드:", "").split(",").map(x => x.trim()).filter(Boolean);
+      if (line.startsWith("URL:")) item.url = line.replace("URL:", "").trim();
     });
 
     if (item.title) items.push(item);
@@ -163,30 +226,28 @@ function parseIssues(text) {
   return items;
 }
 
-/* ---------------- 렌더 ---------------- */
-
 function renderIssues(text) {
   const issues = parseIssues(text);
 
-  if (!issues.length) return "데이터 없음";
+  if (!issues.length) return "<div class='basic-card'>오늘의 이슈를 불러올 수 없습니다.</div>";
 
   let html = "";
 
   issues.forEach(item => {
     html += `
       <div class="issue-card">
-        <div class="issue-title">${item.title}</div>
-        <div>출처: ${item.source} · ${item.date}</div>
+        <div class="issue-title">${escapeHtml(item.title)}</div>
+        <div class="meta">출처: ${escapeHtml(item.source || "미상")} · ${escapeHtml(item.date || "미상")}</div>
 
         <div>
           ${item.keywords.map(k => `
             <a class="keyword-chip" href="https://www.google.com/search?q=${encodeURIComponent(k)}" target="_blank">
-              ${k}
+              ${escapeHtml(k)}
             </a>
           `).join("")}
         </div>
 
-        <a class="cta" href="${item.url}" target="_blank">원문보기 →</a>
+        ${item.url ? `<a class="cta" href="${escapeHtml(item.url)}" target="_blank">원문보기 →</a>` : ""}
       </div>
     `;
   });
@@ -194,26 +255,56 @@ function renderIssues(text) {
   return html;
 }
 
+/* ---------------- 판례/노동법 임시 렌더 ---------------- */
+
+function renderBasic(item) {
+  if (!item) return "<div class='basic-card'>아직 내용이 없습니다.</div>";
+
+  const text = stripHtml(item.body_html || "");
+  const url = item.source_url || "";
+
+  return `
+    <div class="basic-card">
+      <div class="issue-title">${escapeHtml(item.title || "제목 없음")}</div>
+      <p>${escapeHtml(text)}</p>
+      ${url ? `<a class="cta" href="${escapeHtml(url)}" target="_blank">원문보기 →</a>` : ""}
+    </div>
+  `;
+}
+
 /* ---------------- API ---------------- */
 
 async function init() {
-  const res = await fetch(API_URL);
-  const json = await res.json();
+  try {
+    const res = await fetch(API_URL + "?t=" + Date.now());
+    const json = await res.json();
 
-  data = json.letters;
+    data = json.letters || [];
 
-  document.getElementById("title").innerText =
-    data[0].publish_date + " 오늘의 학습";
+    if (!data.length) {
+      document.getElementById("loading").innerText = "발행된 데이터가 없습니다.";
+      return;
+    }
 
-  render();
+    currentDay = data[0];
 
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("app").style.display = "block";
+    document.getElementById("title").innerText =
+      formatDate(currentDay.publish_date) + " 오늘의 학습";
+
+    render();
+    renderArchive();
+
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  } catch (e) {
+    document.getElementById("loading").innerText = "데이터를 불러올 수 없습니다.";
+    console.error(e);
+  }
 }
 
 /* ---------------- 탭 ---------------- */
 
-function selectTab(tab) {
+function selectTab(event, tab) {
   currentTab = tab;
 
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -223,18 +314,56 @@ function selectTab(tab) {
 }
 
 function render() {
-  const today = data[0];
+  if (!currentDay) return;
 
   if (currentTab === "issue") {
     document.getElementById("content").innerHTML =
-      renderIssues(today.issue.body_html);
+      renderIssues(currentDay.issue && currentDay.issue.body_html);
+  } else if (currentTab === "case") {
+    document.getElementById("content").innerHTML =
+      renderBasic(currentDay.case);
   } else {
-    document.getElementById("content").innerHTML = "준비중";
+    document.getElementById("content").innerHTML =
+      renderBasic(currentDay.study);
   }
 }
 
-init();
+/* ---------------- 지난 목록 ---------------- */
 
+function renderArchive() {
+  const box = document.getElementById("archive");
+  box.innerHTML = "";
+
+  const pastLetters = data.slice(1);
+
+  if (!pastLetters.length) {
+    box.innerHTML = "<div class='basic-card'>아직 지난 학습 목록이 없습니다.</div>";
+    return;
+  }
+
+  pastLetters.forEach(day => {
+    const btn = document.createElement("button");
+    btn.innerHTML = `<span>${formatDate(day.publish_date)}</span><span>보기 →</span>`;
+
+    btn.onclick = function() {
+      currentDay = day;
+      currentTab = "issue";
+
+      document.getElementById("title").innerText =
+        formatDate(day.publish_date) + " 오늘의 학습";
+
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelector(".tab").classList.add("active");
+
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    box.appendChild(btn);
+  });
+}
+
+init();
 </script>
 </body>
 </html>
