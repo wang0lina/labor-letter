@@ -75,6 +75,13 @@ body {
 }
 
 .issue-title {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+  
+.big-title {
   font-weight: 900;
   font-size: 32px;
   margin-bottom: 18px;
@@ -363,7 +370,7 @@ function renderBasic(item) {
   const blocks = parseSections(item.body_html || "");
   const url = item.source_url || "";
 
-  let html = `<div class="basic-card"><div class="issue-title">${escapeHtml(item.title || "제목 없음")}</div>`;
+  let html = `<div class="basic-card"><div class="big-title">${escapeHtml(item.title || "제목 없음")}</div>`;
 
   blocks.forEach(block => {
     if (!block.body) return;
