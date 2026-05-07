@@ -124,6 +124,28 @@ body {
   font-weight: 800;
 }
 
+  /* ===== 판례 가독성 개선 ===== */
+
+.case-block {
+  margin: 14px 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fbf8ff;
+  border: 1px solid #eee2ff;
+}
+
+.case-block-title {
+  font-weight: 900;
+  color: #5d2ed1;
+  margin-bottom: 8px;
+}
+
+.case-block-body {
+  white-space: pre-line;
+  line-height: 1.8;
+  color: #222;
+}
+  
 .archive-title {
   margin: 34px 0 14px;
   font-size: 22px;
@@ -349,6 +371,8 @@ function renderBasic(item) {
 
     if (block.heading === "■ 키워드") {
       html += `<div>${renderKeywords(block.body)}</div>`;
+    } else if (currentTab === "case" && block.heading === "■ 판례 핵심 내용") {
+      html += renderFormattedCaseText(block.body);
     } else {
       html += `<div class="content-text">${escapeHtml(block.body)}</div>`;
     }
