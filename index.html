@@ -302,6 +302,38 @@ function parseSections(text) {
   return blocks;
 }
 
+  function formatCaseContent(text) {
+  return String(text || "")
+    .replace(/법원\/사건번호:/g, "\n\n법원/사건번호:")
+    .replace(/판시사항:/g, "\n\n판시사항:")
+    .replace(/판결요지:/g, "\n\n판결요지:")
+    .replace(/주문:/g, "\n\n주문:")
+    .replace(/판단이유:/g, "\n\n판단이유:")
+    .replace(/참조조문:/g, "\n\n참조조문:")
+    .replace(/\s*\[(\d+)\]/g, "\n[$1]")
+    .trim();
+}
+
+function renderFormattedCaseText(text) {
+  const formatted = formatCaseContent(text);
+  const parts = formatted.split(/\n\n+/).filter(Boolean);
+
+  return parts.map(part => {
+    const match = part.match(/^(법원\/사건번호|판시사항|판결요지|주문|판단이유|참조조문):([\s\S]*)$/);
+
+    if (match) {
+      return `
+        <div class="case-block">
+          <div class="case-block-title">${escapeHtml(match[1])}</div>
+          <div class="case-block-body">${escapeHtml(match[2].trim())}</div>
+        </div>
+      `;
+    }
+
+    return `<div class="case-block-body">${escapeHtml(part)}</div>`;
+  }).join("");
+}
+  
 function renderBasic(item) {
   if (!item) return "<div class='basic-card'>아직 내용이 없습니다.</div>";
 
